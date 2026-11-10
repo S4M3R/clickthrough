@@ -53,6 +53,9 @@ function parseArgs(argv) {
     const a = argv[i];
     if (a.startsWith("--")) {
       const [k, inline] = a.slice(2).split("=", 2);
+      // "--project zelto" arriving as ONE argument (an unsplit shell variable)
+      // must fail loudly, not silently fall back to another folder.
+      if (/\s/.test(k)) throw new UserError(`Unrecognized option "${a}". Pass each option and its value as separate arguments.`);
       let v;
       if (inline !== undefined) v = inline;
       else if (argv[i + 1] !== undefined && !argv[i + 1].startsWith("--")) v = argv[++i];
