@@ -76,6 +76,21 @@ Zero runtime dependencies. Node >= 18. ESM.
 Navigate mode makes a component clickable when its label equals or starts with
 an outgoing edge's `via` (or, for edges without `via`, its `label`).
 
+Replies written by `flow-reviews done` carry `evidence`, and the comment gets
+`resolvedBy: "agent"` and `resolvedAt`:
+
+```json
+{ "author": "agent", "text": "Made it blue", "at": "ISO", "evidence": [
+  { "type": "version", "screen": "signup", "v": 3 },
+  { "type": "image", "path": "evidence/c_k3j2h1-a1b2c3.png" },
+  { "type": "link", "url": "https://github.com/o/r/pull/12", "label": "PR #12" },
+  { "type": "check", "text": "npm test: 12 passed" }
+] }
+```
+
+Evidence images live in the flow folder under `evidence/` and are served from
+`/files/<project>%2F<flow>/evidence/…`. Links must be http(s).
+
 `target` may be null (comment on the whole screen). `status`: `open` | `resolved`.
 
 ## Tree derivation (UI)
@@ -137,6 +152,7 @@ flow-reviews screen  <flow> <screen> --image shot.png [--boxes boxes.json] [--ti
 flow-reviews edge    <flow> <from> <to> --label "Sign up with Google" [--via "Sign up with Google"]
 flow-reviews comments [<flow>] [--open]          # JSON to stdout
 flow-reviews reply   <flow> <comment-id> "text"   # author: agent
+flow-reviews done    <flow> <comment-id> "text" [--version <screen>[@v]] [--image f] [--link url --label l] [--check "…"]
 flow-reviews resolve <flow> <comment-id> [--reopen]
 flow-reviews watch   [<flow>] [--all]             # one JSON line per new reviewer comment/reply; never exits
 flow-reviews boxes-script                          # prints the path of capture/boxes.js

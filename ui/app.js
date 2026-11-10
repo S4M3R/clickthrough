@@ -451,13 +451,16 @@ function renderThreads() {
       if (v && c.version !== v.v) vv.title = "Left on another version";
       head.appendChild(vv);
     }
-    if (c.status === "resolved") head.appendChild(el("span", "status-ok", "Resolved"));
+    if (c.status === "resolved") head.appendChild(el("span", "status-ok", c.resolvedBy === "agent" ? "Done" : "Resolved"));
     card.appendChild(head);
 
     card.appendChild(message(c.author, c.text));
     if (c.replies?.length) {
       const reps = el("div", "replies");
-      for (const r of c.replies) reps.appendChild(message(r.author, r.text));
+      for (const r of c.replies) {
+        reps.appendChild(message(r.author, r.text));
+        if (r.evidence?.length) reps.appendChild(evidenceBlock(r.evidence));
+      }
       card.appendChild(reps);
     }
 
@@ -478,6 +481,52 @@ function renderThreads() {
     box.appendChild(card);
   }
   box.scrollTop = scrollTop;
+}
+
+// What the agent showed to prove a change: the screen version, screenshots,
+// links (PR, deploy) and checks that passed.
+function evidenceBlock(items) {
+  const box = el("div", "evidence");
+  box.appendChild(el("p", "ev-title", "Evidence"));
+  for (const e of items) {
+    if (e.type === "version") {
+      const b = el("button", "ev-version", `View ${screens()[e.screen]?.title || e.screen} · v${e.v}`);
+      b.type = "button";
+      b.onclick = (ev) => {
+        ev.stopPropagation();
+        state.versionPick[e.screen] = e.v;
+        if (e.screen === state.screenId) renderAll();
+        else selectScreen(e.screen);
+      };
+      box.appendChild(b);
+    } else if (e.type === "image") {
+      const src = `/files/${encodeURIComponent(state.flowId)}/${e.path.split("/").map(encodeURIComponent).join("/")}`;
+      const a = el("a", "ev-image");
+      a.href = src;
+      a.target = "_blank";
+      a.rel = "noopener";
+      a.addEventListener("click", (ev) => ev.stopPropagation());
+      const img = el("img");
+      img.src = src;
+      img.alt = "Evidence screenshot";
+      img.loading = "lazy";
+      a.appendChild(img);
+      box.appendChild(a);
+    } else if (e.type === "link") {
+      const a = el("a", "ev-link", e.label || e.url);
+      a.href = e.url;
+      a.target = "_blank";
+      a.rel = "noopener noreferrer";
+      a.title = e.url;
+      a.addEventListener("click", (ev) => ev.stopPropagation());
+      box.appendChild(a);
+    } else if (e.type === "check") {
+      const p = el("p", "ev-check");
+      p.append(el("span", "ok", "✓"), document.createTextNode(e.text));
+      box.appendChild(p);
+    }
+  }
+  return box;
 }
 
 function message(author, text) {

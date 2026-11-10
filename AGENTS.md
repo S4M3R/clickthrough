@@ -108,9 +108,21 @@ For each comment:
    changed:
    `flow-reviews screen <flow> <screen> --image … --boxes … --note "GitHub button first"`.
    The open page switches to it on its own.
-3. Reply in plain words with what you did, then resolve:
-   `flow-reviews reply <flow> <comment-id> "Swapped the buttons; see v3."`
-   `flow-reviews resolve <flow> <comment-id>`
+3. Close it with evidence, in plain words, so the person can check your work
+   without asking:
+
+   ```bash
+   flow-reviews done <flow> <comment-id> "Swapped the buttons: GitHub is first." \
+     --version signup                 # the screen version that shows it (latest; or signup@3)
+     --image after.png                # optional screenshot (repeatable)
+     --link https://github.com/o/r/pull/12 --label "PR #12"
+     --check "pnpm test: 49 passed"   # checks you actually ran (repeatable)
+   ```
+
+   `done` adds your reply with the evidence and marks the thread Done. Only
+   list checks you ran and links that exist. Use `reply` (no evidence, thread
+   stays open) for questions and progress notes, and `resolve` only for threads
+   that need no change.
 4. If the request is ambiguous or asks for options, reply with what you need or
    with the options (capture each option as its own screen or version) and leave
    the thread open.

@@ -23,11 +23,16 @@ Usage:
   flow-reviews init     <flow> --title "Onboarding" [--start <screen>]
   flow-reviews screen   <flow> <screen> --image shot.png [--boxes boxes.json]
                         [--title "Create account"] [--route /signup] [--note "what changed"]
+  flow-reviews title    <flow> <screen> "New title" [--route /path]
   flow-reviews edge     <flow> <from> <to> --label "Sign up with Google" [--via "Sign up with Google"]
                         (--via: text of the component that leads there, for Navigate mode)
   flow-reviews unedge   <flow> <from> <to>
   flow-reviews comments [<flow>] [--open]           Print comments as JSON
   flow-reviews reply    <flow> <comment-id> "text"  Reply as the agent
+  flow-reviews done     <flow> <comment-id> "what changed" [evidence…]
+                        --version <screen>[@<v>]  the screen version that shows it (default: latest)
+                        --image shot.png          a screenshot   --link <url> [--label "PR #12"]
+                        --check "pnpm test: 20 passed"   (each flag can repeat)
   flow-reviews resolve  <flow> <comment-id> [--reopen]
   flow-reviews watch    [<flow>] [--all] [--backlog] Print one JSON line per new reviewer comment
   flow-reviews boxes-script                          Path of the in-page script that measures components
@@ -47,9 +52,13 @@ function parseArgs(argv) {
     const a = argv[i];
     if (a.startsWith("--")) {
       const [k, inline] = a.slice(2).split("=", 2);
-      if (inline !== undefined) opts[k] = inline;
-      else if (argv[i + 1] !== undefined && !argv[i + 1].startsWith("--")) opts[k] = argv[++i];
-      else opts[k] = true;
+      let v;
+      if (inline !== undefined) v = inline;
+      else if (argv[i + 1] !== undefined && !argv[i + 1].startsWith("--")) v = argv[++i];
+      else v = true;
+      // Repeated flags (--image a.png --image b.png) collect into a list.
+      if (k in opts) opts[k] = [].concat(opts[k], v);
+      else opts[k] = v;
     } else pos.push(a);
   }
   return { pos, opts };
@@ -149,6 +158,13 @@ async function main() {
         })
       );
     }
+    case "title":
+      return out(
+        await store.setScreenMeta(need(pos[0], "<flow>"), need(pos[1], "<screen>"), {
+          title: pos.slice(2).join(" ") || undefined,
+          route: typeof opts.route === "string" ? opts.route : undefined,
+        })
+      );
     case "edge":
       return out(
         await store.addEdge(need(pos[0], "<flow>"), need(pos[1], "<from>"), need(pos[2], "<to>"),
@@ -180,6 +196,24 @@ async function main() {
           author: "agent",
         })
       );
+    case "done": {
+      const list = (k) => (opts[k] === undefined || opts[k] === true ? [] : [].concat(opts[k]));
+      const evidence = [
+        ...list("version").map((x) => {
+          const [screen, v] = String(x).split("@");
+          return { type: "version", screen, v: v ? Number(v.replace(/^v/, "")) : undefined };
+        }),
+        ...list("image").map((file) => ({ type: "image", file })),
+        ...list("link").map((url, i) => ({ type: "link", url, label: list("label")[i] })),
+        ...list("check").map((text) => ({ type: "check", text })),
+      ];
+      return out(
+        await store.markDone(need(pos[0], "<flow>"), need(pos[1], "<comment-id>"), {
+          text: need(pos.slice(2).join(" "), '"what changed"'),
+          evidence,
+        })
+      );
+    }
     case "resolve":
       return out(
         await store.setStatus(need(pos[0], "<flow>"), need(pos[1], "<comment-id>"), opts.reopen ? "open" : "resolved")

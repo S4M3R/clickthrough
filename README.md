@@ -22,6 +22,9 @@ previous ones a click away.
 - **Comment on the component, not the screenshot.** Every component is a click
   target, so a comment says "Button: Continue with GitHub", not "somewhere top
   left".
+- **Done, with evidence.** When the agent finishes a comment it marks it Done
+  and shows its proof: the screen version with the change (one click to view),
+  screenshots, links to the PR or deploy, and the checks it ran.
 - **Versions per screen.** Each re-capture is a new version with a note on what
   changed; switch between them in the toolbar.
 - **All your projects in one place.** Every project you review is registered
@@ -95,8 +98,7 @@ flow-reviews
 
 # 5. Read and answer comments
 flow-reviews comments onboarding --open
-flow-reviews reply onboarding c_1a2b3c "Moved it above the form"
-flow-reviews resolve onboarding c_1a2b3c
+flow-reviews done onboarding c_1a2b3c "Moved it above the form" --version signup --check "npm test: 12 passed"
 ```
 
 `flow-reviews help` lists every command. Flows default to `./.flow-reviews`;

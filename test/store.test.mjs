@@ -128,3 +128,29 @@ test("project registry adds, de-duplicates and removes", async () => {
   assert.deepEqual((await readProjects()).map((p) => p.id), ["acme-web"]);
   delete process.env.FLOW_REVIEWS_HOME;
 });
+
+test("markDone resolves with evidence and validates it", async () => {
+  const { dir, img } = await fixture();
+  const s = new Store(dir);
+  await s.initFlow("f", {});
+  await s.addScreenVersion("f", "a", { image: img });
+  await s.addScreenVersion("f", "a", { image: img, note: "fixed" });
+  const c = await s.addComment("f", { screen: "a", version: 1, text: "Fix the button" });
+  const done = await s.markDone("f", c.id, {
+    text: "Made it blue",
+    evidence: [
+      { type: "version" },
+      { type: "image", file: img },
+      { type: "link", url: "https://github.com/o/r/pull/1", label: "PR #1" },
+      { type: "check", text: "npm test: 4 passed" },
+    ],
+  });
+  assert.equal(done.status, "resolved");
+  assert.equal(done.resolvedBy, "agent");
+  const ev = done.replies.at(-1).evidence;
+  assert.deepEqual(ev[0], { type: "version", screen: "a", v: 2 });
+  assert.match(ev[1].path, /^evidence\/c_[0-9a-f]+-[0-9a-f]+\.png$/);
+  assert.equal(ev[2].label, "PR #1");
+  await assert.rejects(() => s.markDone("f", c.id, { text: "x", evidence: [{ type: "version", v: 9 }] }), /no v9/);
+  await assert.rejects(() => s.markDone("f", c.id, { text: "x", evidence: [{ type: "link", url: "javascript:alert(1)" }] }), /http/);
+});

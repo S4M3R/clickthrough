@@ -154,6 +154,17 @@ export class Store {
    * Navigate mode can follow a click on that component (defaults to matching
    * the label).
    */
+  /** Rename a screen or change its route without capturing a new version. */
+  async setScreenMeta(flowId, screenId, { title, route }) {
+    const flow = await this.readFlow(flowId);
+    const screen = flow.screens[screenId];
+    if (!screen) throw new UserError(`No screen "${screenId}".`, 404);
+    if (title) screen.title = String(title).slice(0, 200);
+    if (route !== undefined && route !== null) screen.route = String(route);
+    await this.writeFlow(flow);
+    return { screen: screenId, title: screen.title, route: screen.route };
+  }
+
   async addEdge(flowId, from, to, label = "", via = "") {
     assertId("screen", from);
     assertId("screen", to);
@@ -205,6 +216,59 @@ export class Store {
       // A reviewer answering a resolved thread means it isn't done.
       if (author !== "agent" && c.status === "resolved") c.status = "open";
     });
+  }
+
+  /**
+   * The agent closes a comment: a reply saying what it did, the evidence that
+   * it worked, and the thread resolved. Evidence items:
+   *   {type: "version", screen, v?}   the screen version that shows the change (v defaults to latest)
+   *   {type: "image", file}           a screenshot or recording frame, copied into the flow
+   *   {type: "link", url, label?}     a PR, commit, preview deploy…
+   *   {type: "check", text}           a check that passed ("pnpm test: 20 passed")
+   */
+  async markDone(flowId, commentId, { text, evidence = [] }) {
+    const flow = await this.readFlow(flowId);
+    const comments = await this.readComments(flowId);
+    const c = comments.find((x) => x.id === commentId);
+    if (!c) throw new UserError(`No comment "${commentId}".`, 404);
+    const items = [];
+    for (const e of evidence) {
+      if (e.type === "version") {
+        const screen = e.screen || c.screen;
+        const scr = flow.screens[screen];
+        if (!scr) throw new UserError(`No screen "${screen}" for version evidence.`, 404);
+        const v = e.v ? Number(e.v) : scr.versions.length;
+        if (!scr.versions.some((x) => x.v === v)) throw new UserError(`Screen "${screen}" has no v${v}.`, 404);
+        items.push({ type: "version", screen, v });
+      } else if (e.type === "image") {
+        const ext = path.extname(e.file).toLowerCase() || ".png";
+        if (![".png", ".jpg", ".jpeg", ".webp", ".gif"].includes(ext)) throw new UserError(`Evidence image must be png, jpg, webp or gif: ${e.file}`);
+        const rel = `evidence/${commentId}-${crypto.randomBytes(3).toString("hex")}${ext}`;
+        const dest = path.join(this.flowDir(flowId), rel);
+        await fs.mkdir(path.dirname(dest), { recursive: true });
+        await fs.copyFile(e.file, dest);
+        items.push({ type: "image", path: rel });
+      } else if (e.type === "link") {
+        let url;
+        try {
+          url = new URL(String(e.url));
+        } catch {
+          throw new UserError(`Not a URL: ${e.url}`);
+        }
+        if (!["http:", "https:"].includes(url.protocol)) throw new UserError(`Links must be http(s): ${e.url}`);
+        items.push({ type: "link", url: url.href, label: e.label ? String(e.label).slice(0, 120) : "" });
+      } else if (e.type === "check") {
+        items.push({ type: "check", text: cleanText(e.text).slice(0, 300) });
+      } else {
+        throw new UserError(`Unknown evidence type "${e.type}".`);
+      }
+    }
+    c.replies.push({ author: "agent", text: cleanText(text), at: new Date().toISOString(), evidence: items });
+    c.status = "resolved";
+    c.resolvedAt = new Date().toISOString();
+    c.resolvedBy = "agent";
+    await this.writeComments(flowId, comments);
+    return c;
   }
 
   async setStatus(flowId, commentId, status) {
