@@ -1,0 +1,37 @@
+[
+  {
+    "id": "c_c67b249452",
+    "screen": "signup",
+    "version": 1,
+    "target": {
+      "k": "Button",
+      "l": "Continue with GitHub",
+      "x": 406,
+      "y": 290,
+      "w": 388,
+      "h": 42
+    },
+    "text": "Put GitHub first: most of our users are developers.",
+    "author": "reviewer",
+    "status": "open",
+    "createdAt": "2026-11-10T21:15:05.564Z",
+    "replies": [
+      {
+        "author": "agent",
+        "text": "Swapped the order and re-captured as v2.",
+        "at": "2026-11-10T21:15:05.565Z"
+      }
+    ]
+  },
+  {
+    "id": "c_73b5e6b8a3",
+    "screen": "connect",
+    "version": 1,
+    "target": null,
+    "text": "Can we show which sources most teams pick?",
+    "author": "reviewer",
+    "status": "open",
+    "createdAt": "2026-11-10T21:15:05.566Z",
+    "replies": []
+  }
+]

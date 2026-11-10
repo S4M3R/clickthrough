@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Flow Reviews</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="/ui/styles.css">
+</head>
+<body>
+<div class="app" id="app">
+  <aside class="nav" aria-label="Flow">
+    <div class="brand">
+      <div class="brand-row">
+        <span class="logo" aria-hidden="true"></span>
+        <h1>Flow Reviews</h1>
+      </div>
+      <label class="flow-picker" id="flowPickerWrap" hidden>
+        <span class="sr-only">Flow</span>
+        <select id="flowPicker"></select>
+      </label>
+      <p class="flow-title" id="flowTitle"></p>
+    </div>
+    <nav id="tree" class="tree-wrap" aria-label="Screens"></nav>
+    <div class="nav-foot">Click any component to comment. <kbd>&larr;</kbd> <kbd>&rarr;</kbd> move through the flow.</div>
+  </aside>
+
+  <main class="main">
+    <div class="bar">
+      <div class="bar-title">
+        <h2 id="screenTitle"></h2>
+        <span class="route" id="screenRoute" hidden></span>
+      </div>
+      <div class="bar-tools">
+        <div class="seg" id="versions" role="group" aria-label="Version" hidden></div>
+        <label class="toggle"><input type="checkbox" id="outline"> Outline components</label>
+        <button type="button" class="btn" id="commentScreen">Comment on screen</button>
+        <div class="nav-btns">
+          <button type="button" class="btn icon" id="prev" aria-label="Previous screen">&larr;</button>
+          <button type="button" class="btn icon" id="next" aria-label="Next screen">&rarr;</button>
+        </div>
+        <button type="button" class="btn icon" id="togglePanel" aria-label="Toggle comments panel" aria-pressed="true">&#9776;</button>
+      </div>
+    </div>
+    <div class="note" id="versionNote" hidden></div>
+    <div class="stage" id="stage">
+      <div class="frame" id="frame"></div>
+      <div class="empty" id="empty" hidden></div>
+    </div>
+  </main>
+
+  <aside class="panel" id="panel" aria-label="Comments">
+    <div class="panel-head">
+      <h3>Comments</h3>
+      <div class="seg small" role="group" aria-label="Filter">
+        <button type="button" data-filter="open" aria-pressed="true">Open</button>
+        <button type="button" data-filter="all" aria-pressed="false">All</button>
+      </div>
+    </div>
+    <div id="threads" class="threads"></div>
+  </aside>
+</div>
+
+<div class="tip" id="tip" hidden></div>
+<div class="popover" id="popover" role="dialog" aria-label="New comment" hidden>
+  <p class="pop-target" id="popTarget"></p>
+  <textarea id="popText" rows="3" placeholder="What should change?"></textarea>
+  <div class="pop-actions">
+    <span class="hint">&#8984;/Ctrl + Enter</span>
+    <button type="button" class="btn" id="popCancel">Cancel</button>
+    <button type="button" class="btn primary" id="popSubmit">Comment</button>
+  </div>
+</div>
+<div class="toast" id="toast" role="status" hidden></div>
+<script type="module" src="/ui/app.js"></script>
+</body>
+</html>
