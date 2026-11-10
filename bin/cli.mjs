@@ -183,7 +183,14 @@ async function main() {
         for (const f of flows) {
           for (const c of await t.store.readComments(f).catch(() => [])) {
             if (opts.open && c.status !== "open") continue;
-            all.push({ ...(t.project ? { project: t.project } : {}), flow: f, ...c });
+            const abs = (rel) => path.join(t.store.flowDir(f), rel);
+            all.push({
+              ...(t.project ? { project: t.project } : {}),
+              flow: f,
+              ...c,
+              ...(c.images ? { imageFiles: c.images.map(abs) } : {}),
+              replies: c.replies.map((r) => (r.images ? { ...r, imageFiles: r.images.map(abs) } : r)),
+            });
           }
         }
       }
@@ -254,7 +261,7 @@ async function watchComments(getTargets, onlyFlow, backlog, label) {
           const total = 1 + c.replies.length;
           const prev = seen.get(key) ?? (first && !backlog ? total : 0);
           seen.set(key, total);
-          const msgs = [{ author: c.author, text: c.text, type: "comment" }, ...c.replies.map((r) => ({ ...r, type: "reply" }))];
+          const msgs = [{ author: c.author, text: c.text, images: c.images, type: "comment" }, ...c.replies.map((r) => ({ ...r, type: "reply" }))];
           for (const m of msgs.slice(prev)) {
             if (m.author === "agent") continue;
             if (backlog && first && c.status !== "open") continue;
@@ -268,6 +275,8 @@ async function watchComments(getTargets, onlyFlow, backlog, label) {
                 version: c.version,
                 target: describe(c),
                 text: m.text,
+                // Absolute paths so an agent can open the images directly.
+                ...(m.images?.length ? { images: m.images.map((rel) => path.join(store.flowDir(flow), rel)) } : {}),
               }) + "\n"
             );
           }

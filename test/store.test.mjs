@@ -154,3 +154,46 @@ test("markDone resolves with evidence and validates it", async () => {
   await assert.rejects(() => s.markDone("f", c.id, { text: "x", evidence: [{ type: "version", v: 9 }] }), /no v9/);
   await assert.rejects(() => s.markDone("f", c.id, { text: "x", evidence: [{ type: "link", url: "javascript:alert(1)" }] }), /http/);
 });
+
+test("image attachments: real images only, referenced from comments and replies", async () => {
+  const { dir, img } = await fixture();
+  const app = createServer({ projects: [{ id: "p", name: "P", dir }] });
+  const st = new Store(dir);
+  await st.initFlow("f", {});
+  await st.addScreenVersion("f", "a", { image: img });
+  const port = await app.listen(0);
+  const base = `http://127.0.0.1:${port}`;
+  const key = encodeURIComponent("p/f");
+  try {
+    const up = await fetch(`${base}/api/flows/${key}/attachments`, { method: "POST", headers: { "content-type": "image/png" }, body: PNG });
+    assert.equal(up.status, 201);
+    const { path: rel, url } = await up.json();
+    assert.match(rel, /^attachments\/[a-z0-9-]+\.png$/);
+    assert.equal((await fetch(base + url)).status, 200);
+
+    const fake = await fetch(`${base}/api/flows/${key}/attachments`, { method: "POST", headers: { "content-type": "image/png" }, body: "<svg onload=alert(1)>" });
+    assert.equal(fake.status, 415);
+
+    const res = await fetch(`${base}/api/flows/${key}/comments`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ screen: "a", version: 1, target: null, text: "", images: [rel] }),
+    });
+    assert.equal(res.status, 201);
+    const c = await res.json();
+    assert.deepEqual(c.images, [rel]);
+    assert.equal(c.text, "(see image)");
+
+    const bad = await fetch(`${base}/api/flows/${key}/comments`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ screen: "a", text: "x", images: ["../../flow.json"] }),
+    });
+    assert.equal(bad.status, 400);
+
+    const r = await st.reply("f", c.id, { text: "and this", images: [rel] });
+    assert.deepEqual(r.replies[0].images, [rel]);
+  } finally {
+    await app.close();
+  }
+});

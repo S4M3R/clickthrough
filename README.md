@@ -21,7 +21,7 @@ previous ones a click away.
   "Sign up with Google" and you are on the next screen of that branch.
 - **Comment on the component, not the screenshot.** Every component is a click
   target, so a comment says "Button: Continue with GitHub", not "somewhere top
-  left".
+  left". Paste, drop or attach images to show what you mean.
 - **Done, with evidence.** When the agent finishes a comment it marks it Done
   and shows its proof: the screen version with the change (one click to view),
   screenshots, links to the PR or deploy, and the checks it ran.

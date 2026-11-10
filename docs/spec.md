@@ -132,8 +132,9 @@ A project is `{id, name, dir}` in `~/.config/flow-reviews/projects.json`
 | GET | `/api/projects` | `[{id,name,dir,flows:<count>}]` |
 | GET | `/api/flows` | `[{id:"<project>/<flow>",flow,title,project:{id,name},screens:<count>,open:<open comments>}]` |
 | GET | `/api/flows/:id` | `{flow, comments, project}` |
-| POST | `/api/flows/:id/comments` | `{screen, version, target|null, text}` → comment |
-| POST | `/api/flows/:id/comments/:cid/replies` | `{text, author?}` (author defaults `reviewer`) → comment |
+| POST | `/api/flows/:id/attachments` | raw image bytes (PNG/JPEG/WebP/GIF, ≤10 MB) → `{path, url}` |
+| POST | `/api/flows/:id/comments` | `{screen, version, target|null, text, images?: [path]}` → comment |
+| POST | `/api/flows/:id/comments/:cid/replies` | `{text, images?, author?}` (author defaults `reviewer`) → comment |
 | POST | `/api/flows/:id/comments/:cid/status` | `{status}` → comment |
 | GET | `/api/events` | SSE; event `change` data `{"flow":"<project>/<flow>"}` whenever a flow dir changes |
 | GET | `/files/:id/<path>` | static files inside the flow dir (shots) |

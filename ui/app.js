@@ -379,10 +379,11 @@ function openPopover(target, anchor) {
   hideTip();
   const keep = state.draft && state.draft.screen === state.screenId &&
     ((state.draft.target && target && itemKey(state.draft.target) === itemKey(target)) || (!state.draft.target && !target));
-  state.draft = { screen: state.screenId, target, text: keep ? state.draft.text : "" };
+  state.draft = { screen: state.screenId, target, text: keep ? state.draft.text : "", images: keep ? state.draft.images ?? [] : [] };
   const pop = $("popover");
   $("popTarget").textContent = targetLabel(target);
   $("popText").value = state.draft.text;
+  renderDraftImages();
   pop.hidden = false;
   placePopover(anchor);
   $("popText").focus();
@@ -401,17 +402,88 @@ function closePopover() {
   $("popover").hidden = true;
   state.draft = null;
 }
+// ---------- Attachments ----------
+const fileUrl = (rel) => `/files/${encodeURIComponent(state.flowId)}/${rel.split("/").map(encodeURIComponent).join("/")}`;
+const IMAGE_TYPES = ["image/png", "image/jpeg", "image/webp", "image/gif"];
+
+async function attachFiles(files) {
+  if (!state.draft) return;
+  for (const file of files) {
+    if (!IMAGE_TYPES.includes(file.type)) { toast("Only PNG, JPEG, WebP or GIF images can be attached."); continue; }
+    if (file.size > 10 * 1024 * 1024) { toast("Images can be up to 10 MB."); continue; }
+    if (state.draft.images.length >= 6) { toast("Up to 6 images per comment."); break; }
+    // Show it straight away; the upload replaces the local preview with the stored path.
+    const item = { preview: URL.createObjectURL(file), path: null };
+    state.draft.images.push(item);
+    renderDraftImages();
+    try {
+      const res = await fetch(`/api/flows/${encodeURIComponent(state.flowId)}/attachments`, {
+        method: "POST",
+        headers: { "content-type": file.type },
+        body: file,
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || "Upload failed");
+      item.path = data.path;
+    } catch (e) {
+      toast(e.message);
+      if (state.draft) state.draft.images = state.draft.images.filter((x) => x !== item);
+    }
+    renderDraftImages();
+  }
+}
+
+function renderDraftImages() {
+  const box = $("popImages");
+  box.textContent = "";
+  const imgs = state.draft?.images ?? [];
+  box.hidden = imgs.length === 0;
+  imgs.forEach((item, i) => {
+    const t = el("div", "pop-thumb" + (item.path ? "" : " uploading"));
+    const img = el("img");
+    img.src = item.preview;
+    img.alt = `Attachment ${i + 1}`;
+    const rm = el("button", null, "×");
+    rm.type = "button";
+    rm.setAttribute("aria-label", `Remove attachment ${i + 1}`);
+    rm.onclick = () => { state.draft.images.splice(i, 1); renderDraftImages(); };
+    t.append(img, rm);
+    box.appendChild(t);
+  });
+}
+
+function imagesBlock(paths) {
+  const box = el("div", "msg-images");
+  for (const rel of paths) {
+    const a = el("a");
+    a.href = fileUrl(rel);
+    a.target = "_blank";
+    a.rel = "noopener";
+    a.addEventListener("click", (ev) => ev.stopPropagation());
+    const img = el("img");
+    img.src = fileUrl(rel);
+    img.alt = "Attached image";
+    img.loading = "lazy";
+    a.appendChild(img);
+    box.appendChild(a);
+  }
+  return box;
+}
+
 async function submitPopover() {
   const d = state.draft;
   const text = $("popText").value.trim();
-  if (!d || !text) return;
+  if (!d) return;
+  if (d.images.some((x) => !x.path)) { toast("Wait for the images to finish uploading."); return; }
+  const images = d.images.map((x) => x.path);
+  if (!text && !images.length) return;
   const scr = screens()[d.screen];
   const v = currentVersion(scr, d.screen);
   $("popSubmit").disabled = true;
   try {
     const c = await api(`/api/flows/${encodeURIComponent(state.flowId)}/comments`, {
       method: "POST",
-      body: { screen: d.screen, version: v?.v ?? null, target: d.target, text },
+      body: { screen: d.screen, version: v?.v ?? null, target: d.target, text, images },
     });
     closePopover();
     upsertComment(c);
@@ -455,10 +527,12 @@ function renderThreads() {
     card.appendChild(head);
 
     card.appendChild(message(c.author, c.text));
+    if (c.images?.length) card.appendChild(imagesBlock(c.images));
     if (c.replies?.length) {
       const reps = el("div", "replies");
       for (const r of c.replies) {
         reps.appendChild(message(r.author, r.text));
+        if (r.images?.length) reps.appendChild(imagesBlock(r.images));
         if (r.evidence?.length) reps.appendChild(evidenceBlock(r.evidence));
       }
       card.appendChild(reps);
@@ -792,6 +866,18 @@ state.mode = store.get("fr-mode") === "navigate" ? "navigate" : "comment";
 document.querySelectorAll("#mode [data-mode]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.mode === state.mode)));
 $("popCancel").onclick = closePopover;
 $("popSubmit").onclick = submitPopover;
+$("popFile").addEventListener("change", (e) => { attachFiles([...e.target.files]); e.target.value = ""; });
+$("popText").addEventListener("paste", (e) => {
+  const files = [...(e.clipboardData?.files ?? [])].filter((f) => f.type.startsWith("image/"));
+  if (files.length) { e.preventDefault(); attachFiles(files); }
+});
+$("popover").addEventListener("dragover", (e) => { e.preventDefault(); $("popover").classList.add("dragging"); });
+$("popover").addEventListener("dragleave", () => $("popover").classList.remove("dragging"));
+$("popover").addEventListener("drop", (e) => {
+  e.preventDefault();
+  $("popover").classList.remove("dragging");
+  attachFiles([...(e.dataTransfer?.files ?? [])]);
+});
 $("popText").addEventListener("input", (e) => { if (state.draft) state.draft.text = e.target.value; });
 $("popText").addEventListener("keydown", (e) => {
   if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) { e.preventDefault(); submitPopover(); }
@@ -822,7 +908,7 @@ document.addEventListener("keydown", (e) => {
 });
 document.addEventListener("mousedown", (e) => {
   const pop = $("popover");
-  if (!pop.hidden && !pop.contains(e.target) && !e.target.closest(".hs, #commentScreen") && !$("popText").value.trim()) closePopover();
+  if (!pop.hidden && !pop.contains(e.target) && !e.target.closest(".hs, #commentScreen") && !$("popText").value.trim() && !(state.draft?.images?.length)) closePopover();
 });
 window.addEventListener("popstate", () => route().catch((e) => toast(e.message)));
 window.addEventListener("hashchange", () => route().catch((e) => toast(e.message)));

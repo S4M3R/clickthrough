@@ -185,16 +185,55 @@ export class Store {
     return flow.edges;
   }
 
-  async addComment(flowId, { screen, version, target = null, text, author = "reviewer" }) {
+  /**
+   * Store an image a reviewer attached (pasted, dropped or picked). Only real
+   * PNG/JPEG/WebP/GIF bytes are accepted, whatever the upload claims to be.
+   * Returns the path to reference from a comment's `images`.
+   */
+  async saveAttachment(flowId, buffer) {
+    await this.readFlow(flowId);
+    const ext = imageExt(buffer);
+    if (!ext) throw new UserError("Attachments must be PNG, JPEG, WebP or GIF images.", 415);
+    if (buffer.length > MAX_ATTACHMENT_BYTES) throw new UserError("Images can be up to 10 MB.", 413);
+    const rel = `attachments/${Date.now().toString(36)}-${crypto.randomBytes(4).toString("hex")}.${ext}`;
+    const dest = path.join(this.flowDir(flowId), rel);
+    await fs.mkdir(path.dirname(dest), { recursive: true });
+    await fs.writeFile(dest, buffer);
+    return rel;
+  }
+
+  async #cleanImages(flowId, images) {
+    if (!images) return [];
+    if (!Array.isArray(images)) throw new UserError("images must be a list of attachment paths.");
+    if (images.length > 6) throw new UserError("Attach up to 6 images per message.");
+    const out = [];
+    for (const rel of images) {
+      if (typeof rel !== "string" || !/^attachments\/[a-z0-9-]+\.(png|jpg|webp|gif)$/.test(rel)) {
+        throw new UserError(`Not an attachment: ${rel}`);
+      }
+      try {
+        await fs.access(path.join(this.flowDir(flowId), rel));
+      } catch {
+        throw new UserError(`Attachment not found: ${rel}`, 404);
+      }
+      out.push(rel);
+    }
+    return out;
+  }
+
+  async addComment(flowId, { screen, version, target = null, text, images, author = "reviewer" }) {
     const flow = await this.readFlow(flowId);
     if (!flow.screens[screen]) throw new UserError(`No screen "${screen}".`, 404);
-    const body = cleanText(text);
+    const attached = await this.#cleanImages(flowId, images);
+    // An image can carry the whole comment ("like this"), so text is optional with one.
+    const body = attached.length && !String(text ?? "").trim() ? "(see image)" : cleanText(text);
     const comment = {
       id: "c_" + crypto.randomBytes(5).toString("hex"),
       screen,
       version: Number(version) || flow.screens[screen].versions.length || 1,
       target: cleanTarget(target),
       text: body,
+      ...(attached.length ? { images: attached } : {}),
       author: author === "agent" ? "agent" : "reviewer",
       status: "open",
       createdAt: new Date().toISOString(),
@@ -206,11 +245,13 @@ export class Store {
     return comment;
   }
 
-  async reply(flowId, commentId, { text, author = "reviewer" }) {
+  async reply(flowId, commentId, { text, images, author = "reviewer" }) {
+    const attached = await this.#cleanImages(flowId, images);
     return this.#update(flowId, commentId, (c) => {
       c.replies.push({
         author: author === "agent" ? "agent" : "reviewer",
-        text: cleanText(text),
+        text: attached.length && !String(text ?? "").trim() ? "(see image)" : cleanText(text),
+        ...(attached.length ? { images: attached } : {}),
         at: new Date().toISOString(),
       });
       // A reviewer answering a resolved thread means it isn't done.
@@ -288,6 +329,17 @@ export class Store {
     await this.writeComments(flowId, comments);
     return c;
   }
+}
+
+export const MAX_ATTACHMENT_BYTES = 10 * 1024 * 1024;
+
+/** File extension for PNG/JPEG/WebP/GIF bytes, from their signature; else null. */
+export function imageExt(b) {
+  if (b.length > 8 && b.readUInt32BE(0) === 0x89504e47) return "png";
+  if (b.length > 3 && b[0] === 0xff && b[1] === 0xd8 && b[2] === 0xff) return "jpg";
+  if (b.length > 12 && b.toString("ascii", 0, 4) === "RIFF" && b.toString("ascii", 8, 12) === "WEBP") return "webp";
+  if (b.length > 6 && b.toString("ascii", 0, 4) === "GIF8") return "gif";
+  return null;
 }
 
 function cleanText(text) {

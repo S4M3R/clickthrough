@@ -6,7 +6,7 @@ import http from "node:http";
 import { promises as fs, watch } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { Store, UserError } from "./store.mjs";
+import { Store, UserError, MAX_ATTACHMENT_BYTES } from "./store.mjs";
 
 const UI_DIR = path.join(path.dirname(fileURLToPath(import.meta.url)), "..", "ui");
 
@@ -166,12 +166,18 @@ export function createServer({ projects, dir }) {
       const [flow, comments] = await Promise.all([store.readFlow(flowId), store.readComments(flowId)]);
       return json(res, { flow: { ...flow, id: key }, comments, project: { id: project.id, name: project.name } });
     }
+    if (req.method === "POST" && sub === "attachments") {
+      // Raw image bytes in the body; the store checks they really are an image.
+      const buf = await rawBody(req, MAX_ATTACHMENT_BYTES);
+      const rel = await store.saveAttachment(flowId, buf);
+      return json(res, { path: rel, url: `/files/${encodeURIComponent(key)}/${rel}` }, 201);
+    }
     if (req.method === "POST" && sub === "comments" && !cid) {
       return json(res, await store.addComment(flowId, await body(req)), 201);
     }
     if (req.method === "POST" && sub === "comments" && cid && action === "replies") {
       const b = await body(req);
-      return json(res, await store.reply(flowId, cid, { text: b.text, author: b.author }));
+      return json(res, await store.reply(flowId, cid, { text: b.text, images: b.images, author: b.author }));
     }
     if (req.method === "POST" && sub === "comments" && cid && action === "status") {
       return json(res, await store.setStatus(flowId, cid, (await body(req)).status));
@@ -214,6 +220,17 @@ async function sendFile(res, file) {
     "cache-control": "no-cache",
   });
   res.end(data);
+}
+
+async function rawBody(req, limit) {
+  const chunks = [];
+  let size = 0;
+  for await (const c of req) {
+    size += c.length;
+    if (size > limit) throw new UserError("Images can be up to 10 MB.", 413);
+    chunks.push(c);
+  }
+  return Buffer.concat(chunks);
 }
 
 async function body(req) {

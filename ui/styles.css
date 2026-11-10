@@ -200,3 +200,15 @@ a.brand-row { color: inherit; text-decoration: none; }
 .ev-link { font-size: 12.5px; color: var(--accent); overflow-wrap: anywhere; }
 .ev-check { margin: 0; font-size: 12.5px; color: var(--fg); display: flex; gap: 6px; }
 .ev-check .ok { color: oklch(0.55 0.13 160); font-weight: 600; }
+
+/* Image attachments: previews in the comment box, thumbnails in threads */
+.pop-images, .msg-images { display: flex; flex-wrap: wrap; gap: 6px; }
+.pop-thumb { position: relative; width: 64px; height: 48px; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; background: var(--bg); }
+.pop-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.pop-thumb.uploading img { opacity: .45; }
+.pop-thumb button { position: absolute; top: 2px; right: 2px; width: 18px; height: 18px; border: 0; border-radius: 50%; background: rgba(0,0,0,.6); color: #fff; font-size: 12px; line-height: 18px; padding: 0; cursor: pointer; }
+.popover.dragging { outline: 2px dashed var(--accent); outline-offset: 2px; }
+.btn.attach { cursor: pointer; font-size: 14px; }
+.msg-images { margin: 6px 0 2px; }
+.msg-images a { display: block; }
+.msg-images img { display: block; max-width: 132px; max-height: 96px; border: 1px solid var(--line); border-radius: 6px; object-fit: cover; }

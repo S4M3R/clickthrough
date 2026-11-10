@@ -90,6 +90,10 @@ flow-reviews watch [<flow>]     # one JSON line per new reviewer comment or repl
 flow-reviews watch --all        # every registered project (lines include "project")
 ```
 
+A comment can carry images the reviewer pasted or dropped (a reference, a
+sketch, the bug). They arrive as absolute file paths in `images` (and as
+`imageFiles` in `flow-reviews comments`): open them before you start.
+
 Each line looks like:
 
 ```json
