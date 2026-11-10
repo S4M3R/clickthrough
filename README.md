@@ -10,7 +10,10 @@ should change. The agent reads your comments, changes the code, re-captures the
 screens and replies on each thread. New versions show up live, with the
 previous ones a click away.
 
-![Clickthrough showing a signup flow with branches and a comment thread](docs/screenshot.png)
+![A reviewer clicks through a signup flow, comments on the GitHub button, and the agent replies with a new version and its evidence](site/media/demo.gif)
+
+The recording uses a made-up product; the scripts that produce it are in
+[site/demo](site/demo).
 
 - **Branches, not a list.** A flow is a graph: "Sign up with Google" and "Email
   and password" are separate branches, and so is each integration you can

@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Clickthrough: click the button that's wrong, your coding agent fixes it</title>
+<meta name="description" content="An open-source CLI and local review page. Your coding agent captures every screen of a product flow, you click any component and comment, and the agent changes the code and shows its proof.">
+<link rel="canonical" href="https://clickthrough.agustin.build/">
+<meta name="theme-color" content="#eef0f4">
+
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Clickthrough">
+<meta property="og:url" content="https://clickthrough.agustin.build/">
+<meta property="og:title" content="Click the button that's wrong. Your coding agent fixes it.">
+<meta property="og:description" content="Your agent captures every screen of a product flow, with every branch. You click through them, comment on any component, and the agent changes the code and shows its proof. Open source, runs locally.">
+<meta property="og:image" content="https://clickthrough.agustin.build/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Clickthrough showing a signup screen with a comment on the GitHub button, marked Done by the agent with a new version, a screenshot, a PR link and a passing check.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Click the button that's wrong. Your coding agent fixes it.">
+<meta name="twitter:description" content="Review a product flow screen by screen, comment on any component, and let your coding agent make the change. Open source, runs locally.">
+<meta name="twitter:image" content="https://clickthrough.agustin.build/og.png">
+<meta name="twitter:image:alt" content="Clickthrough showing a signup screen with a comment on the GitHub button, marked Done by the agent with a new version, a screenshot, a PR link and a passing check.">
+
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<!-- The page's contents, drawn the way Clickthrough draws a flow: a branch tree. -->
+<aside class="rail" aria-label="On this page">
+  <a class="brand" href="#top"><span class="logo" aria-hidden="true"></span>Clickthrough</a>
+  <nav>
+    <ul class="tree">
+      <li><a class="row" href="#top"><span class="n">01</span><span class="t">What it is</span></a></li>
+      <li><a class="row" href="#loop"><span class="n">02</span><span class="t">The loop</span></a></li>
+      <li>
+        <span class="row branch"><svg class="caret" viewBox="0 0 10 10" aria-hidden="true"><path d="M3.5 2 L7 5 L3.5 8"/></svg>Set it up</span>
+        <ul>
+          <li><a class="row" href="#install"><span class="n">01</span><span class="t">Install</span></a></li>
+          <li><a class="row" href="#prompt"><span class="n">02</span><span class="t">Prompt your agent</span></a></li>
+        </ul>
+      </li>
+      <li>
+        <span class="row branch"><svg class="caret" viewBox="0 0 10 10" aria-hidden="true"><path d="M3.5 2 L7 5 L3.5 8"/></svg>Review</span>
+        <ul>
+          <li><a class="row" href="#modes"><span class="n">01</span><span class="t">Comment or navigate</span></a></li>
+          <li><a class="row" href="#branches"><span class="n">02</span><span class="t">Branches</span></a></li>
+        </ul>
+      </li>
+      <li>
+        <span class="row branch"><svg class="caret" viewBox="0 0 10 10" aria-hidden="true"><path d="M3.5 2 L7 5 L3.5 8"/></svg>The agent's side</span>
+        <ul>
+          <li><a class="row" href="#done"><span class="n">01</span><span class="t">Done, with evidence</span></a></li>
+          <li><a class="row" href="#more"><span class="n">02</span><span class="t">Versions, projects, files</span></a></li>
+        </ul>
+      </li>
+      <li><a class="row join" href="https://github.com/S4M3R/clickthrough"><span class="n">↪</span><span class="t">continues at GitHub</span></a></li>
+    </ul>
+  </nav>
+  <p class="rail-foot">This list is drawn like a flow in Clickthrough: screens in order, a branch at each choice.</p>
+</aside>
+
+<header class="top">
+  <a class="brand" href="#top"><span class="logo" aria-hidden="true"></span>Clickthrough</a>
+  <a class="top-link" href="https://github.com/S4M3R/clickthrough">GitHub</a>
+</header>
+
+<main id="main">
+  <section class="hero" id="top">
+    <h1 data-c="Heading">Click the button that's wrong. Your coding agent fixes it.</h1>
+    <p class="lede">Clickthrough is a local review page for product flows. Your agent captures every screen of signup, onboarding or checkout, with every branch. You click through them like the real app and comment on any component. The agent changes the code, captures the screen again and shows its proof.</p>
+    <div class="cta">
+      <div class="cmd" data-c="Code">
+        <code><span class="p">$</span> npm install -g github:S4M3R/clickthrough</code>
+        <button type="button" class="copy" data-copy="npm install -g github:S4M3R/clickthrough">Copy</button>
+      </div>
+      <a class="ghost" href="https://github.com/S4M3R/clickthrough">Read the source on GitHub</a>
+    </div>
+    <p class="fine">Open source, MIT. Needs Node 18 or newer. No dependencies, no account, nothing leaves your machine.</p>
+
+    <figure class="shot hero-shot">
+      <video id="demo" poster="media/demo-poster.jpg" width="1632" height="1200" autoplay muted loop playsinline controls preload="metadata"
+        aria-label="Demo: a reviewer clicks through a signup flow, comments on the GitHub button, and the agent replies with a new version and evidence.">
+        <source src="media/demo.mp4" type="video/mp4">
+      </video>
+      <figcaption>Under 40 seconds, no sound. The product on screen is made up. The agent's side is a script you can run yourself: <a href="https://github.com/S4M3R/clickthrough/tree/main/site/demo">site/demo/agent.sh</a>.</figcaption>
+    </figure>
+  </section>
+
+  <section id="loop">
+    <h2 data-c="Heading">The loop</h2>
+    <ol class="loop">
+      <li>
+        <h3>The agent captures the flow</h3>
+        <p>It drives your app with its browser tool, screenshots each screen and records where every button, field and heading is. Each choice a user can make becomes a branch.</p>
+      </li>
+      <li>
+        <h3>You click through and comment</h3>
+        <p>Run <code>clickthrough</code>. Walk the branch tree, click any component and write what should change.</p>
+      </li>
+      <li>
+        <h3>Your comment wakes the agent</h3>
+        <p><code>clickthrough watch</code> runs in the background and prints each new comment as one line. The agent finds the code behind that component and changes it.</p>
+      </li>
+      <li>
+        <h3>You get the change and the proof</h3>
+        <p>The screen you are looking at switches to the new version. The thread turns Done, with the version, screenshots, links and the checks the agent ran.</p>
+      </li>
+    </ol>
+  </section>
+
+  <section id="install" class="split">
+    <div>
+      <h2 data-c="Heading">Install</h2>
+      <p>One global install, then <code>clickthrough</code> from anywhere opens the review page in your browser.</p>
+      <p>To look around first, clone the repo and run <code>npm start</code>. It serves a demo flow.</p>
+    </div>
+    <div class="stack">
+      <div class="cmd" data-c="Code">
+        <code><span class="p">$</span> npm install -g github:S4M3R/clickthrough</code>
+        <button type="button" class="copy" data-copy="npm install -g github:S4M3R/clickthrough">Copy</button>
+      </div>
+      <p class="or">or, without installing</p>
+      <div class="cmd" data-c="Code">
+        <code><span class="p">$</span> npx github:S4M3R/clickthrough</code>
+        <button type="button" class="copy" data-copy="npx github:S4M3R/clickthrough">Copy</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="prompt" class="split">
+    <div>
+      <h2 data-c="Heading">Prompt your agent</h2>
+      <p>You do not capture screens by hand. Give your coding agent this prompt in your project and it does the rest.</p>
+      <p><a href="https://github.com/S4M3R/clickthrough/blob/main/AGENTS.md">AGENTS.md</a> is written for the agent: how to capture a screen and its components, how to wire the branches, and how to work through your comments.</p>
+      <p>It works with Claude Code, Codex, Cursor, T3 Code, or any agent that can run a shell command and drive a browser.</p>
+    </div>
+    <div class="prompt" data-c="Text">
+      <p id="prompt-text">Read https://github.com/S4M3R/clickthrough/blob/main/AGENTS.md, then capture our signup and onboarding flow with every branch, start the review server and watch for my comments.</p>
+      <button type="button" class="copy" data-copy-from="prompt-text">Copy prompt</button>
+    </div>
+  </section>
+
+  <section id="modes">
+    <h2 data-c="Heading">Comment or navigate</h2>
+    <p class="wide">The review page has two modes. Switch here the way you do in the tool: press <kbd>C</kbd> or <kbd>N</kbd>.</p>
+    <div class="modes">
+      <div class="seg" role="group" aria-label="Mode">
+        <button type="button" data-mode="comment" aria-pressed="true">Comment</button>
+        <button type="button" data-mode="navigate" aria-pressed="false">Navigate</button>
+      </div>
+      <div class="mode" data-for="comment">
+        <p><strong>Comment on the component, not the screenshot.</strong> Every button, field and heading is a click target, so your comment arrives as “Button: Continue with GitHub”, not “somewhere top left”. Paste, drop or attach images to show what you mean. The agent gets them as files it can open.</p>
+        <figure class="shot pan"><img src="media/comment.webp" width="2000" height="1400" loading="lazy" alt="Comment mode: every component on a workspace form is outlined, and a comment box on the Workspace URL field holds a note and an attached sketch."></figure>
+      </div>
+      <div class="mode" data-for="navigate" hidden>
+        <p><strong>Click through the screens like the real app.</strong> Components that lead somewhere get a dashed outline. Click “Stripe” and you are on the Stripe screen of that branch. The arrow keys move along the flow.</p>
+        <figure class="shot pan"><img src="media/navigate.webp" width="2000" height="1400" loading="lazy" alt="Navigate mode: on a Connect your data screen the Stripe card is highlighted with a tooltip that says Go to Connect Stripe."></figure>
+      </div>
+    </div>
+  </section>
+
+  <section id="branches" class="split">
+    <div>
+      <h2 data-c="Heading">Branches, not a slideshow</h2>
+      <p>A flow is a graph. “Sign up with GitHub” and “Email and password” are separate branches, and so is each integration a user can connect.</p>
+      <p>Where branches meet again, the tree says “continues at…” instead of repeating the screens. Open comments are counted on each screen and on the branch that holds it.</p>
+      <p>The agent adds one edge per real choice, labeled in the user's words:</p>
+      <pre data-c="Code"><code><span class="p">$</span> clickthrough edge onboarding signup github \
+    --label "Sign up with GitHub" \
+    --via "Continue with GitHub"
+<span class="p">$</span> clickthrough edge onboarding connect stripe \
+    --label "Stripe" --via "Stripe"</code></pre>
+    </div>
+    <figure class="shot narrow"><img src="media/tree.webp" width="526" height="1270" loading="lazy" alt="The branch tree of a signup flow: a GitHub branch that forks into Postgres, Stripe and API, then Google and email branches that continue at the workspace screen."></figure>
+  </section>
+
+  <section id="done" class="split">
+    <div>
+      <h2 data-c="Heading">Done, with evidence</h2>
+      <p>When the agent finishes a comment it does not just say so. The thread gets a Done badge and what the agent attached: the screen version that shows the change (one click to view), screenshots, a link to the PR or the deploy, and the checks it ran.</p>
+      <p>Not right yet? Reply. The thread reopens and your reply reaches the agent like a new comment.</p>
+      <pre data-c="Code"><code><span class="p">$</span> clickthrough done onboarding c_1a2b3c \
+    "Swapped the buttons: GitHub is first." \
+    --version signup --image after.png \
+    --link https://github.com/acme/web/pull/12 \
+    --label "PR #12" \
+    --check "npm test: 49 passed"</code></pre>
+    </div>
+    <figure class="shot narrow"><img src="media/evidence.webp" width="598" height="844" loading="lazy" alt="A comment thread on the GitHub button marked Done. The agent's reply lists its evidence: a button to view version 2 of the screen, a screenshot, a link to PR 12 and a passing test run."></figure>
+  </section>
+
+  <section id="more">
+    <h2 data-c="Heading">Versions, projects, files</h2>
+    <div class="facts">
+      <article>
+        <figure class="shot pan"><img src="media/versions.webp" width="2000" height="600" loading="lazy" alt="The toolbar of a screen with v1 and v2 buttons and a note that reads: v2 (latest): GitHub button first."></figure>
+        <h3>A version for every capture</h3>
+        <p>Each time the agent captures a screen again it becomes a new version with a note on what changed. The page you have open moves to it on its own, and the earlier versions stay one click away.</p>
+      </article>
+      <article>
+        <figure class="shot"><img src="media/projects.webp" width="1360" height="420" loading="lazy" alt="The Clickthrough home page listing two projects, Acme web and Acme admin, with their flows, screen counts and open comments."></figure>
+        <h3>All your projects on one page</h3>
+        <p>Each project keeps its flows in its own <code>.clickthrough/</code> folder. <code>clickthrough</code> lists them together, and every screen has a URL you can bookmark: <code>/p/project/flow/screen</code>.</p>
+      </article>
+      <article class="plain">
+        <h3>Local, plain files</h3>
+        <p>Flows are JSON and images inside your project. The server listens on <code>127.0.0.1</code> only. There is no account and no cloud, and the package has zero runtime dependencies.</p>
+        <p>Add <code>.clickthrough/</code> to your <code>.gitignore</code> if the screenshots should stay out of the repo.</p>
+      </article>
+    </div>
+  </section>
+
+  <section class="end">
+    <h2 data-c="Heading">Try it on your own flow</h2>
+    <div class="cta">
+      <div class="cmd" data-c="Code">
+        <code><span class="p">$</span> npm install -g github:S4M3R/clickthrough</code>
+        <button type="button" class="copy" data-copy="npm install -g github:S4M3R/clickthrough">Copy</button>
+      </div>
+      <a class="ghost" href="https://github.com/S4M3R/clickthrough">Read the source on GitHub</a>
+    </div>
+    <p class="fine">Found a bug or want something changed? <a href="https://github.com/S4M3R/clickthrough/issues">Open an issue</a>.</p>
+  </section>
+</main>
+
+<footer>
+  <span>Clickthrough is MIT licensed.</span>
+  <span>Built by <a href="https://github.com/S4M3R">S4M3R</a>.</span>
+</footer>
+
+<script src="site.js" defer></script>
+</body>
+</html>
