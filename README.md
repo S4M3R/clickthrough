@@ -21,27 +21,46 @@ previous ones a click away.
   left".
 - **Versions per screen.** Each re-capture is a new version with a note on what
   changed; switch between them in the toolbar.
+- **All your projects in one place.** Every project you review is registered
+  once; `flow-reviews` opens a home page listing them, and each screen has its
+  own URL (`/p/<project>/<flow>/<screen>`) you can bookmark or share locally.
 - **Local and plain files.** Flows live in `.flow-reviews/` in your project as
   JSON and images. No account, no cloud, no runtime dependencies.
 - **Made for agents.** A small CLI to add screens and edges, read comments,
   reply and resolve, and a `watch` command that prints each new comment as one
   line, so an agent running it in the background is woken by your comments.
 
-## Try it
+## Install
 
 Needs Node 18 or newer.
 
 ```bash
-git clone https://github.com/S4M3R/T3-flow-reviews
-cd T3-flow-reviews
-npm start            # serves the demo flow in examples/ at http://localhost:4777
+npm install -g github:S4M3R/T3-flow-reviews
 ```
 
-Or run it in any project without cloning:
+Then, from anywhere:
 
 ```bash
-npx github:S4M3R/T3-flow-reviews serve --open
+flow-reviews          # opens the review in your browser, with every project
 ```
+
+No install? `npx github:S4M3R/T3-flow-reviews` does the same. To see the demo
+flow, clone the repo and run `npm start`.
+
+## Projects
+
+Each project keeps its flows in its own `.flow-reviews/` folder. The first
+`flow-reviews init` in a project registers it, so `flow-reviews` shows it next to
+the others. Manage the list with:
+
+```bash
+flow-reviews projects                       # list
+flow-reviews projects add web --dir ./.flow-reviews --name "Web app"
+flow-reviews projects remove web
+flow-reviews comments --project web --open  # any command works on a registered project
+```
+
+The registry is `~/.config/flow-reviews/projects.json`.
 
 ## Use it with your coding agent
 
@@ -57,8 +76,8 @@ components, how to wire branches, and how to work through comments.
 ## By hand
 
 ```bash
-# 1. A flow
-npx github:S4M3R/T3-flow-reviews init onboarding --title "Onboarding"
+# 1. A flow (also registers this project)
+flow-reviews init onboarding --title "Onboarding"
 
 # 2. Screens: a screenshot, plus the component boxes measured in the page
 #    (evaluate capture/boxes.js in the page and save its output)
@@ -69,7 +88,7 @@ flow-reviews screen onboarding verify --image verify.png --boxes verify.json --t
 flow-reviews edge onboarding signup verify --label "Email and password"
 
 # 4. Review
-flow-reviews serve --open
+flow-reviews
 
 # 5. Read and answer comments
 flow-reviews comments onboarding --open

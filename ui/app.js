@@ -258,7 +258,8 @@ function renderStage() {
     empty.textContent = "";
     empty.append(el("h3", null, scr ? "No captures for this screen yet" : "This flow has no screens yet"));
     empty.append(el("p", null, "Add a capture from your project with:"));
-    empty.append(el("pre", null, `flow-reviews screen ${state.flowId} ${id || "<screen>"} --image shot.png --boxes boxes.json`));
+    const [proj, flowName] = String(state.flowId).split("/");
+    empty.append(el("pre", null, `flow-reviews screen ${flowName ?? proj} ${id || "<screen>"} --image shot.png --boxes boxes.json${flowName ? ` --project ${proj}` : ""}`));
     return;
   }
   frame.hidden = false;
@@ -496,14 +497,38 @@ function applyLit() {
   document.querySelectorAll(".hs").forEach((h) => h.classList.toggle("lit", key != null && h.dataset.key === key));
 }
 
+// ---------- Routes ----------
+// "/" is the projects home; "/p/<project>/<flow>/<screen>" a screen. Flow ids
+// from the API are "<project>/<flow>". Old "#<flow>/<screen>" links still work.
+function routeFor(flowId, screen) {
+  const segs = String(flowId).split("/").concat(screen ? [screen] : []);
+  return "/p/" + segs.map(encodeURIComponent).join("/");
+}
+function parseRoute() {
+  const dec = (x) => { try { return decodeURIComponent(x); } catch { return x; } };
+  const parts = location.pathname.split("/").filter(Boolean).map(dec);
+  if (parts[0] === "p" && parts.length >= 3) {
+    return { home: false, flow: `${parts[1]}/${parts[2]}`, screen: parts[3] || null };
+  }
+  if (location.hash.length > 1) {
+    const [flow, screen] = location.hash.slice(1).split("/").map(dec);
+    return { home: false, flow: flow || null, screen: screen || null };
+  }
+  return { home: true, flow: null, screen: null };
+}
+function go(url) {
+  if (location.pathname + location.hash !== url) history.pushState(null, "", url);
+  route();
+}
+
 // ---------- Navigation ----------
 function selectScreen(id, { replace = false } = {}) {
   if (id === state.screenId) return;
   state.screenId = id;
   state.lit = null;
   if (state.draft && state.draft.screen !== id) closePopover();
-  const hash = `#${encodeURIComponent(state.flowId)}/${encodeURIComponent(id)}`;
-  if (location.hash !== hash) history[replace ? "replaceState" : "pushState"](null, "", hash);
+  const url = routeFor(state.flowId, id);
+  if (location.pathname !== url) history[replace ? "replaceState" : "pushState"](null, "", url);
   store.set(`fr-screen:${state.flowId}`, id);
   renderAll();
   $("stage").scrollTop = 0;
@@ -526,10 +551,22 @@ async function loadFlows() {
   state.flows = await api("/api/flows").catch(() => []);
   const pick = $("flowPicker");
   pick.textContent = "";
+  // Flows grouped by project (the server addresses them as "<project>/<flow>").
+  const groups = new Map();
   for (const f of state.flows) {
-    const o = el("option", null, f.title || f.id);
-    o.value = f.id;
-    pick.appendChild(o);
+    const name = f.project?.name ?? "Flows";
+    if (!groups.has(name)) groups.set(name, []);
+    groups.get(name).push(f);
+  }
+  for (const [name, flows] of groups) {
+    const parent = groups.size > 1 ? el("optgroup") : pick;
+    if (parent !== pick) { parent.label = name; pick.appendChild(parent); }
+    for (const f of flows) {
+      const label = (f.title || f.flow || f.id) + (f.open ? ` (${f.open} open)` : "");
+      const o = el("option", null, label);
+      o.value = f.id;
+      parent.appendChild(o);
+    }
   }
   $("flowPickerWrap").hidden = state.flows.length < 2;
   // The picker already names the flow; the plain title is for single-flow setups.
@@ -547,9 +584,10 @@ async function loadFlow(id, { keepScreen = true } = {}) {
   if (switching) { state.versionPick = {}; state.lit = null; closePopover(); }
   $("flowPicker").value = id;
   $("flowTitle").textContent = data.flow.title || id;
+  $("crumbProject").textContent = data.project?.name ?? "";
   document.title = `${data.flow.title || id} · Flow Reviews`;
 
-  const fromHash = parseHash();
+  const fromHash = parseRoute();
   let screen = (fromHash.flow === id && screens()[fromHash.screen] && fromHash.screen) ||
     (keepScreen && !switching && screens()[state.screenId] && state.screenId) ||
     (screens()[store.get(`fr-screen:${id}`)] && store.get(`fr-screen:${id}`)) ||
@@ -566,8 +604,8 @@ async function loadFlow(id, { keepScreen = true } = {}) {
   const stageScroll = $("stage").scrollTop;
   state.screenId = screen;
   if (screen) {
-    const hash = `#${encodeURIComponent(id)}/${encodeURIComponent(screen)}`;
-    if (location.hash !== hash) history.replaceState(null, "", hash);
+    const url = routeFor(id, screen);
+    if (location.pathname !== url) history.replaceState(null, "", url);
   }
   renderAll();
   if (!switching) $("stage").scrollTop = stageScroll;
@@ -581,17 +619,70 @@ async function loadFlow(id, { keepScreen = true } = {}) {
   }
 }
 
-function parseHash() {
-  const [flow, screen] = location.hash.slice(1).split("/").map((s) => { try { return decodeURIComponent(s); } catch { return s; } });
-  return { flow: flow || null, screen: screen || null };
+async function route() {
+  const r = parseRoute();
+  if (r.home) return showHome();
+  $("home").hidden = true;
+  $("app").hidden = false;
+  if (r.flow !== state.flowId) await loadFlows();
+  if (!state.flows.some((f) => f.id === r.flow)) {
+    // Unknown or moved flow: back to the projects list.
+    history.replaceState(null, "", "/");
+    return showHome();
+  }
+  if (r.flow !== state.flowId) await loadFlow(r.flow, { keepScreen: false });
+  else if (r.screen && screens()[r.screen] && r.screen !== state.screenId) selectScreen(r.screen, { replace: true });
 }
 
-async function boot() {
-  await loadFlows();
-  if (!state.flows.length) { state.flow = null; renderAll(); return; }
-  const h = parseHash();
-  const id = state.flows.some((f) => f.id === h.flow) ? h.flow : state.flows[0].id;
-  await loadFlow(id, { keepScreen: false });
+async function showHome() {
+  closePopover();
+  state.flowId = null;
+  state.flow = null;
+  $("app").hidden = true;
+  $("home").hidden = false;
+  document.title = "Flow Reviews";
+  const [projects, flows] = await Promise.all([
+    api("/api/projects").catch(() => []),
+    api("/api/flows").catch(() => []),
+  ]);
+  state.flows = flows;
+  const box = $("projects");
+  box.textContent = "";
+  if (!flows.length) {
+    const empty = el("div", "home-empty");
+    empty.append(
+      el("p", null, "No flows yet. In a project, have your coding agent capture one, or run:"),
+      el("pre", null,
+        "flow-reviews init onboarding --title \"Onboarding\"\n" +
+        "flow-reviews screen onboarding signup --image signup.png --boxes signup.json\n" +
+        "flow-reviews serve")
+    );
+    box.appendChild(empty);
+    return;
+  }
+  for (const p of projects) {
+    const mine = flows.filter((f) => f.project?.id === p.id);
+    const card = el("section", "project");
+    card.append(el("h3", null, p.name), el("p", "dir", p.dir));
+    card.querySelector(".dir").title = p.dir;
+    if (!mine.length) card.append(el("p", "none", "No flows yet."));
+    else {
+      const ul = el("ul", "flow-links");
+      for (const f of mine) {
+        const a = el("a");
+        a.href = routeFor(f.id);
+        a.dataset.link = "";
+        const meta = el("span", "meta", `${f.screens} screens`);
+        if (f.open) meta.append(" · ", el("span", "open", `${f.open} open`));
+        a.append(el("span", null, f.title || f.flow), meta);
+        const li = el("li");
+        li.appendChild(a);
+        ul.appendChild(li);
+      }
+      card.append(ul);
+    }
+    box.appendChild(card);
+  }
 }
 
 function listen() {
@@ -600,9 +691,10 @@ function listen() {
   es.addEventListener("change", async (e) => {
     let data = {};
     try { data = JSON.parse(e.data); } catch { /* ignore */ }
-    if (!state.flowId) { await boot(); return; }
+    if (!$("home").hidden) { await showHome(); return; }
+    if (!state.flowId) { await route(); return; }
     if (data.flow && data.flow !== state.flowId) { await loadFlows(); $("flowPicker").value = state.flowId; return; }
-    try { await loadFlow(state.flowId); } catch { await boot(); }
+    try { await loadFlow(state.flowId); } catch { history.replaceState(null, "", "/"); await showHome(); }
   });
 }
 
@@ -619,7 +711,7 @@ $("popText").addEventListener("keydown", (e) => {
   if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) { e.preventDefault(); submitPopover(); }
   if (e.key === "Escape") closePopover();
 });
-$("flowPicker").onchange = (e) => { history.replaceState(null, "", `#${encodeURIComponent(e.target.value)}`); loadFlow(e.target.value, { keepScreen: false }); };
+$("flowPicker").onchange = (e) => go(routeFor(e.target.value));
 document.querySelectorAll("[data-filter]").forEach((b) => {
   b.onclick = () => {
     state.filter = b.dataset.filter;
@@ -645,12 +737,16 @@ document.addEventListener("mousedown", (e) => {
   const pop = $("popover");
   if (!pop.hidden && !pop.contains(e.target) && !e.target.closest(".hs, #commentScreen") && !$("popText").value.trim()) closePopover();
 });
-window.addEventListener("hashchange", () => {
-  const h = parseHash();
-  if (h.flow && h.flow !== state.flowId && state.flows.some((f) => f.id === h.flow)) loadFlow(h.flow, { keepScreen: false });
-  else if (h.screen && screens()[h.screen] && h.screen !== state.screenId) selectScreen(h.screen, { replace: true });
+window.addEventListener("popstate", () => route().catch((e) => toast(e.message)));
+window.addEventListener("hashchange", () => route().catch((e) => toast(e.message)));
+// In-app links navigate without a page load (modifier-clicks open a new tab as usual).
+document.addEventListener("click", (e) => {
+  const a = e.target.closest("a[data-link]");
+  if (!a || e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
+  e.preventDefault();
+  go(a.getAttribute("href"));
 });
 window.addEventListener("resize", () => { if (!$("popover").hidden) closePopover(); });
 
-boot().catch((e) => toast(e.message));
+route().catch((e) => toast(e.message));
 listen();

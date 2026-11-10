@@ -66,30 +66,65 @@ test("normalizeBoxes accepts a double-encoded string", () => {
   assert.equal(normalizeBoxes(JSON.stringify(inner)).items[0].k, "Text");
 });
 
-test("serves the API and refuses path traversal", async () => {
-  const { dir, img } = await fixture();
-  const app = createServer({ dir });
-  await app.store.addScreenVersion("f", "s", { image: img }).catch(async () => {
-    await app.store.initFlow("f", {});
-    await app.store.addScreenVersion("f", "s", { image: img });
-  });
+test("serves several projects and refuses path traversal", async () => {
+  const a = await fixture();
+  const b = await fixture();
+  for (const f of [a, b]) {
+    const st = new Store(f.dir);
+    await st.initFlow("onboarding", { title: "Onboarding" });
+    await st.addScreenVersion("onboarding", "s", { image: f.img });
+  }
+  const projects = [
+    { id: "web", name: "Web app", dir: a.dir },
+    { id: "mobile", name: "Mobile", dir: b.dir },
+  ];
+  const app = createServer({ projects });
   const port = await app.listen(0);
   const base = `http://127.0.0.1:${port}`;
   try {
     const list = await (await fetch(`${base}/api/flows`)).json();
-    assert.equal(list[0].id, "f");
-    const res = await fetch(`${base}/api/flows/f/comments`, {
+    assert.deepEqual(list.map((f) => f.id).sort(), ["mobile/onboarding", "web/onboarding"]);
+    assert.equal(list.find((f) => f.id === "web/onboarding").project.name, "Web app");
+    const ps = await (await fetch(`${base}/api/projects`)).json();
+    assert.deepEqual(ps.map((p) => [p.id, p.flows]), [["web", 1], ["mobile", 1]]);
+
+    const key = encodeURIComponent("mobile/onboarding");
+    const res = await fetch(`${base}/api/flows/${key}/comments`, {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ screen: "s", version: 1, target: null, text: "Hello" }),
     });
     assert.equal(res.status, 201);
-    const { comments } = await (await fetch(`${base}/api/flows/f`)).json();
-    assert.equal(comments[0].text, "Hello");
-    assert.equal((await fetch(`${base}/files/f/shots/s-v1.png`)).status, 200);
-    assert.equal((await fetch(`${base}/files/f/%2e%2e%2f%2e%2e%2fetc%2fpasswd`)).status, 404);
-    assert.equal((await fetch(`${base}/api/flows/..%2f..`)).status, 400);
+    const got = await (await fetch(`${base}/api/flows/${key}`)).json();
+    assert.equal(got.comments[0].text, "Hello");
+    assert.equal(got.flow.id, "mobile/onboarding");
+    // The comment landed in the mobile project only.
+    assert.equal((await new Store(a.dir).readComments("onboarding")).length, 0);
+
+    assert.equal((await fetch(`${base}/files/${key}/shots/s-v1.png`)).status, 200);
+    assert.equal((await fetch(`${base}/files/${key}/%2e%2e%2f%2e%2e%2fetc%2fpasswd`)).status, 404);
+    assert.equal((await fetch(`${base}/api/flows/${encodeURIComponent("web/../x")}`)).status, 404);
+    assert.equal((await fetch(`${base}/api/flows/${encodeURIComponent("nope/onboarding")}`)).status, 404);
   } finally {
     await app.close();
   }
+});
+
+test("project registry adds, de-duplicates and removes", async () => {
+  const home = await mkdtemp(path.join(tmpdir(), "fr-home-"));
+  process.env.FLOW_REVIEWS_HOME = home;
+  const { addProject, readProjects, removeProject, defaultProjectId } = await import("../src/projects.mjs");
+  const one = path.join(home, "acme-web", ".flow-reviews");
+  const two = path.join(home, "other", "acme-web", ".flow-reviews");
+  assert.equal(defaultProjectId(one), "acme-web");
+  const p1 = await addProject({ dir: one });
+  const again = await addProject({ dir: one, name: "Acme web" });
+  assert.equal(again.id, p1.id);
+  assert.equal(again.name, "Acme web");
+  const p2 = await addProject({ dir: two });
+  assert.equal(p2.id, "acme-web-2");
+  await assert.rejects(() => addProject({ dir: path.join(home, "x"), id: "acme-web" }), /already exists/);
+  await removeProject("acme-web-2");
+  assert.deepEqual((await readProjects()).map((p) => p.id), ["acme-web"]);
+  delete process.env.FLOW_REVIEWS_HOME;
 });

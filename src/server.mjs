@@ -24,11 +24,39 @@ const TYPES = {
   ".svg": "image/svg+xml",
 };
 
-export function createServer({ dir }) {
-  const store = new Store(dir);
+/**
+ * `projects` is either a fixed list of `{id, name, dir}` or an async function
+ * returning one (re-read on every listing, so projects registered while the
+ * server runs show up without a restart). Flows are addressed as
+ * `<project>/<flow>` everywhere in the API, so two projects can both have an
+ * "onboarding" flow.
+ */
+export function createServer({ projects, dir }) {
+  const getProjects =
+    typeof projects === "function"
+      ? projects
+      : async () => projects ?? [{ id: "local", name: "Local", dir }];
+  const stores = new Map(); // project id -> Store
   const clients = new Set();
 
-  // Watch the whole flow-reviews dir; debounce per flow so a burst of writes
+  async function resolve(key) {
+    const [pid, flowId, ...extra] = String(key).split("/");
+    if (!pid || !flowId || extra.length) throw new UserError(`Flow key must be "<project>/<flow>", got "${key}".`, 404);
+    const project = (await getProjects()).find((p) => p.id === pid);
+    if (!project) throw new UserError(`No project "${pid}".`, 404);
+    return { project, store: storeFor(project), flowId };
+  }
+  function storeFor(project) {
+    let st = stores.get(project.id);
+    if (!st || st.dir !== path.resolve(project.dir)) {
+      st = new Store(project.dir);
+      stores.set(project.id, st);
+      startWatch(project.id, st);
+    }
+    return st;
+  }
+
+  // Watch each project's flows folder; debounce per flow so a burst of writes
   // (image copy + flow.json rename) becomes one "change" event.
   const timers = new Map();
   const notify = (flow) => {
@@ -41,30 +69,46 @@ export function createServer({ dir }) {
       }, 150)
     );
   };
-  let watcher = null;
-  const startWatch = async () => {
-    await fs.mkdir(store.dir, { recursive: true });
+  const watchers = new Map();
+  const startWatch = async (pid, store) => {
+    watchers.get(pid)?.close?.();
+    await fs.mkdir(store.dir, { recursive: true }).catch(() => {});
     try {
-      watcher = watch(store.dir, { recursive: true }, (_e, file) => {
-        if (!file || String(file).endsWith(".tmp")) return;
-        notify(String(file).split(path.sep)[0]);
-      });
+      watchers.set(
+        pid,
+        watch(store.dir, { recursive: true }, (_e, file) => {
+          if (!file || String(file).endsWith(".tmp")) return;
+          notify(`${pid}/${String(file).split(path.sep)[0]}`);
+        })
+      );
     } catch {
-      // Recursive watch is unsupported on some Linux setups: fall back to a
-      // poll of every flow's mtimes.
+      // Recursive watch is unsupported on some Linux setups: poll mtimes.
       const mtimes = new Map();
-      setInterval(async () => {
+      const timer = setInterval(async () => {
         for (const f of await store.listFlows().catch(() => [])) {
           for (const name of ["flow.json", "comments.json"]) {
             const p = path.join(store.flowDir(f.id), name);
             const m = (await fs.stat(p).catch(() => null))?.mtimeMs ?? 0;
-            if (mtimes.has(p) && mtimes.get(p) !== m) notify(f.id);
+            if (mtimes.has(p) && mtimes.get(p) !== m) notify(`${pid}/${f.id}`);
             mtimes.set(p, m);
           }
         }
-      }, 1000).unref();
+      }, 1000);
+      timer.unref();
+      watchers.set(pid, { close: () => clearInterval(timer) });
     }
   };
+
+  async function listAllFlows() {
+    const out = [];
+    for (const project of await getProjects()) {
+      const flows = await storeFor(project).listFlows().catch(() => []);
+      for (const f of flows) {
+        out.push({ ...f, id: `${project.id}/${f.id}`, flow: f.id, project: { id: project.id, name: project.name } });
+      }
+    }
+    return out;
+  }
 
   const server = http.createServer(async (req, res) => {
     try {
@@ -73,10 +117,11 @@ export function createServer({ dir }) {
 
       if (parts[0] === "api") return await api(req, res, parts.slice(1));
       if (parts[0] === "files" && parts.length >= 3) {
-        const base = store.flowDir(parts[1]);
-        return await sendFile(res, safeJoin(base, parts.slice(2).join("/")));
+        const { store, flowId } = await resolve(parts[1]);
+        return await sendFile(res, safeJoin(store.flowDir(flowId), parts.slice(2).join("/")));
       }
-      if (parts.length === 0) return await sendFile(res, path.join(UI_DIR, "index.html"));
+      // The UI routes itself: "/" is the projects home, "/p/<project>/<flow>/<screen>" a screen.
+      if (parts.length === 0 || parts[0] === "p") return await sendFile(res, path.join(UI_DIR, "index.html"));
       if (parts[0] === "ui") return await sendFile(res, safeJoin(UI_DIR, parts.slice(1).join("/")));
       throw new UserError("Not found", 404);
     } catch (err) {
@@ -100,13 +145,26 @@ export function createServer({ dir }) {
       });
       return;
     }
+    if (req.method === "GET" && parts[0] === "projects") {
+      const flows = await listAllFlows();
+      return json(
+        res,
+        (await getProjects()).map((p) => ({
+          id: p.id,
+          name: p.name,
+          dir: p.dir,
+          flows: flows.filter((f) => f.project.id === p.id).length,
+        }))
+      );
+    }
     if (parts[0] !== "flows") throw new UserError("Not found", 404);
-    const [, flowId, sub, cid, action] = parts;
+    const [, key, sub, cid, action] = parts;
 
-    if (req.method === "GET" && !flowId) return json(res, await store.listFlows());
-    if (req.method === "GET" && flowId && !sub) {
+    if (req.method === "GET" && !key) return json(res, await listAllFlows());
+    const { project, store, flowId } = await resolve(key);
+    if (req.method === "GET" && !sub) {
       const [flow, comments] = await Promise.all([store.readFlow(flowId), store.readComments(flowId)]);
-      return json(res, { flow, comments });
+      return json(res, { flow: { ...flow, id: key }, comments, project: { id: project.id, name: project.name } });
     }
     if (req.method === "POST" && sub === "comments" && !cid) {
       return json(res, await store.addComment(flowId, await body(req)), 201);
@@ -122,9 +180,8 @@ export function createServer({ dir }) {
   }
 
   return {
-    store,
     async listen(port, host = "127.0.0.1") {
-      await startWatch();
+      for (const p of await getProjects()) storeFor(p);
       await new Promise((resolve, reject) => {
         server.once("error", reject);
         server.listen(port, host, resolve);
@@ -132,7 +189,7 @@ export function createServer({ dir }) {
       return server.address().port;
     },
     close() {
-      watcher?.close();
+      for (const w of watchers.values()) w?.close?.();
       for (const res of clients) res.end();
       return new Promise((r) => server.close(r));
     },

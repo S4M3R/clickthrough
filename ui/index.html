@@ -9,13 +9,28 @@
 <link rel="stylesheet" href="/ui/styles.css">
 </head>
 <body>
+<div class="home" id="home" hidden>
+  <header class="home-head">
+    <a class="brand-row" href="/" data-link>
+      <span class="logo" aria-hidden="true"></span>
+      <h1>Flow Reviews</h1>
+    </a>
+  </header>
+  <main class="home-main">
+    <h2>Projects</h2>
+    <div id="projects" class="projects"></div>
+  </main>
+</div>
 <div class="app" id="app">
   <aside class="nav" aria-label="Flow">
     <div class="brand">
-      <div class="brand-row">
+      <a class="brand-row" href="/" data-link>
         <span class="logo" aria-hidden="true"></span>
         <h1>Flow Reviews</h1>
-      </div>
+      </a>
+      <nav class="crumbs" aria-label="Breadcrumb">
+        <a href="/" data-link>Projects</a><span aria-hidden="true">/</span><span id="crumbProject"></span>
+      </nav>
       <label class="flow-picker" id="flowPickerWrap" hidden>
         <span class="sr-only">Flow</span>
         <select id="flowPicker"></select>
