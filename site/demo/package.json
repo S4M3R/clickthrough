@@ -1,0 +1,15 @@
+{
+  "name": "clickthrough-site-demo",
+  "private": true,
+  "type": "module",
+  "description": "Builds the synthetic Acme flows and records the demo used on the landing page. Not part of the published package.",
+  "scripts": {
+    "flows": "node build-flows.mjs",
+    "record": "node record.mjs",
+    "shots": "node shots.mjs",
+    "all": "node build-flows.mjs && node record.mjs && node build-flows.mjs && node shots.mjs"
+  },
+  "devDependencies": {
+    "playwright": "^1.50.0"
+  }
+}

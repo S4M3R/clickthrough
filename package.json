@@ -11,5 +11,8 @@
     "test": "node --test test/*.test.mjs"
   },
   "keywords": ["design-review", "ux", "screenshots", "coding-agent", "claude-code", "codex", "t3"],
-  "license": "MIT"
+  "license": "MIT",
+  "repository": { "type": "git", "url": "git+https://github.com/S4M3R/clickthrough.git" },
+  "homepage": "https://clickthrough.agustin.build",
+  "bugs": { "url": "https://github.com/S4M3R/clickthrough/issues" }
 }
