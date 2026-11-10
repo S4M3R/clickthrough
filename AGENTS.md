@@ -10,8 +10,8 @@ You are helping a person review a product flow. Your job:
    screens as new versions, reply on each thread, and resolve it.
 
 Run the CLI as `clickthrough <command>` if it is installed
-(`npm install -g github:S4M3R/clickthrough`), else
-`npx github:S4M3R/clickthrough <command>`. Run it from the project's root:
+(`npm install -g clickthrough`), else
+`npx clickthrough <command>`. Run it from the project's root:
 flows are stored in `./.clickthrough/` there (or pass `--dir`, or
 `--project <id>` for a registered project). `clickthrough init` registers the
 project, so the person's `clickthrough` home page lists it with their other

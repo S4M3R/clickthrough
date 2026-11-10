@@ -9,11 +9,10 @@ I review product flows by clicking the button that's wrong and writing what shou
 
 Clickthrough: open source, runs locally, works with Claude Code, Codex, Cursor and more.
 
-npm install -g github:S4M3R/clickthrough
+npm install -g clickthrough
 
 https://clickthrough.agustin.build
 
 ---
 
-278 characters as X counts them (a link counts as 23). After `npm publish`, the
-install line becomes `npm install -g clickthrough`.
+265 characters as X counts them (a link counts as 23).
