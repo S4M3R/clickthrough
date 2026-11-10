@@ -17,7 +17,7 @@ async function fixture() {
   const dir = await mkdtemp(path.join(tmpdir(), "fr-"));
   const img = path.join(dir, "shot.png");
   await writeFile(img, PNG);
-  return { dir: path.join(dir, ".flow-reviews"), img };
+  return { dir: path.join(dir, ".clickthrough"), img };
 }
 
 test("builds a flow with versions, branches and comments", async () => {
@@ -112,10 +112,10 @@ test("serves several projects and refuses path traversal", async () => {
 
 test("project registry adds, de-duplicates and removes", async () => {
   const home = await mkdtemp(path.join(tmpdir(), "fr-home-"));
-  process.env.FLOW_REVIEWS_HOME = home;
+  process.env.CLICKTHROUGH_HOME = home;
   const { addProject, readProjects, removeProject, defaultProjectId } = await import("../src/projects.mjs");
-  const one = path.join(home, "acme-web", ".flow-reviews");
-  const two = path.join(home, "other", "acme-web", ".flow-reviews");
+  const one = path.join(home, "acme-web", ".clickthrough");
+  const two = path.join(home, "other", "acme-web", ".clickthrough");
   assert.equal(defaultProjectId(one), "acme-web");
   const p1 = await addProject({ dir: one });
   const again = await addProject({ dir: one, name: "Acme web" });
@@ -126,7 +126,7 @@ test("project registry adds, de-duplicates and removes", async () => {
   await assert.rejects(() => addProject({ dir: path.join(home, "x"), id: "acme-web" }), /already exists/);
   await removeProject("acme-web-2");
   assert.deepEqual((await readProjects()).map((p) => p.id), ["acme-web"]);
-  delete process.env.FLOW_REVIEWS_HOME;
+  delete process.env.CLICKTHROUGH_HOME;
 });
 
 test("markDone resolves with evidence and validates it", async () => {

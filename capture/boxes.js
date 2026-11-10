@@ -1,6 +1,6 @@
 // Evaluate this in the page you just screenshotted (Playwright `page.evaluate`,
 // agent-browser `eval`, Chrome DevTools…). It returns a JSON string with every
-// visible component's box in page pixels, which `flow-reviews screen --boxes`
+// visible component's box in page pixels, which `clickthrough screen --boxes`
 // turns into clickable areas on the screenshot.
 //
 // Take a FULL-PAGE screenshot at the same viewport so the boxes line up, and

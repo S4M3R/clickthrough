@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// flow-reviews: capture a product flow as screens + branches, review it in a
+// clickthrough: capture a product flow as screens + branches, review it in a
 // local web UI, and hand the comments to a coding agent. See README.md.
 
 import { promises as fs } from "node:fs";
@@ -12,37 +12,38 @@ import { addProject, defaultProjectId, findProject, readProjects, registryFile, 
 
 const ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), "..");
 
-const HELP = `flow-reviews: review a product flow screen by screen, with your coding agent.
+const HELP = `clickthrough: click through a product flow, comment on any component, and let your coding agent fix it.
 
 Usage:
-  flow-reviews                                       Open the review in your browser (all projects)
-  flow-reviews serve    [--port 4777] [--open]       Same, without opening the browser
-  flow-reviews projects                              List your projects
-  flow-reviews projects add [<id>] [--dir <path>] [--name "Acme web"]
-  flow-reviews projects remove <id>
-  flow-reviews init     <flow> --title "Onboarding" [--start <screen>]
-  flow-reviews screen   <flow> <screen> --image shot.png [--boxes boxes.json]
+  clickthrough                                       Open the review in your browser (all projects)
+  clickthrough serve    [--port 4777] [--open]       Same, without opening the browser
+  clickthrough projects                              List your projects
+  clickthrough projects add [<id>] [--dir <path>] [--name "Acme web"]
+  clickthrough projects remove <id>
+  clickthrough init     <flow> --title "Onboarding" [--start <screen>]
+  clickthrough screen   <flow> <screen> --image shot.png [--boxes boxes.json]
                         [--title "Create account"] [--route /signup] [--note "what changed"]
-  flow-reviews title    <flow> <screen> "New title" [--route /path]
-  flow-reviews edge     <flow> <from> <to> --label "Sign up with Google" [--via "Sign up with Google"]
+  clickthrough title    <flow> <screen> "New title" [--route /path]
+  clickthrough edge     <flow> <from> <to> --label "Sign up with Google" [--via "Sign up with Google"]
                         (--via: text of the component that leads there, for Navigate mode)
-  flow-reviews unedge   <flow> <from> <to>
-  flow-reviews comments [<flow>] [--open]           Print comments as JSON
-  flow-reviews reply    <flow> <comment-id> "text"  Reply as the agent
-  flow-reviews done     <flow> <comment-id> "what changed" [evidence…]
+  clickthrough unedge   <flow> <from> <to>
+  clickthrough comments [<flow>] [--open]           Print comments as JSON
+  clickthrough reply    <flow> <comment-id> "text"  Reply as the agent
+  clickthrough done     <flow> <comment-id> "what changed" [evidence…]
                         --version <screen>[@<v>]  the screen version that shows it (default: latest)
                         --image shot.png          a screenshot   --link <url> [--label "PR #12"]
                         --check "pnpm test: 20 passed"   (each flag can repeat)
-  flow-reviews resolve  <flow> <comment-id> [--reopen]
-  flow-reviews watch    [<flow>] [--all] [--backlog] Print one JSON line per new reviewer comment
-  flow-reviews boxes-script                          Path of the in-page script that measures components
+  clickthrough resolve  <flow> <comment-id> [--reopen]
+  clickthrough watch    [<flow>] [--all] [--backlog] Print one JSON line per new reviewer comment
+  clickthrough boxes-script                          Path of the in-page script that measures components
 
 Global:
   --project <id> Work on a registered project from anywhere
-  --dir <path>   Where flows live (default: ./.flow-reviews, or $FLOW_REVIEWS_DIR)
+  --dir <path>   Where flows live (default: ./.clickthrough, or $CLICKTHROUGH_DIR)
 
 \`init\` registers the project, so \`serve\` shows it next to your others.
-Registry: $FLOW_REVIEWS_HOME/projects.json (default ~/.config/flow-reviews).
+Registry: $CLICKTHROUGH_HOME/projects.json (default ~/.config/clickthrough).
+\`flow-reviews\` still works as an alias for \`clickthrough\`.
 `;
 
 function parseArgs(argv) {
@@ -73,7 +74,7 @@ const out = (data) => process.stdout.write(JSON.stringify(data, null, 2) + "\n")
 
 async function main() {
   let [cmd, ...rest] = process.argv.slice(2);
-  // `flow-reviews` alone, or `flow-reviews review`: open the review in the browser.
+  // `clickthrough` alone, or `clickthrough review`: open the review in the browser.
   if (cmd === undefined || cmd === "review" || (cmd && cmd.startsWith("--") && cmd !== "--help")) {
     if (cmd && cmd.startsWith("--")) rest = [cmd, ...rest];
     cmd = "serve";
@@ -81,11 +82,11 @@ async function main() {
   }
   const { pos, opts } = parseArgs(rest);
   // Which flows folder a command acts on: --dir, then --project, then the
-  // env var, then ./.flow-reviews in the current folder.
+  // env var, then ./.clickthrough in the current folder.
   const explicitDir = typeof opts.dir === "string" ? opts.dir : null;
   const projectOpt = typeof opts.project === "string" ? opts.project : null;
   const dir = explicitDir || (projectOpt ? (await findProject(projectOpt)).dir : null) ||
-    process.env.FLOW_REVIEWS_DIR || ".flow-reviews";
+    process.env.CLICKTHROUGH_DIR || process.env.FLOW_REVIEWS_DIR || (await defaultFlowsDir());
   const store = new Store(dir);
 
   switch (cmd) {
@@ -107,7 +108,7 @@ async function main() {
       const port = await app.listen(Number(opts.port || process.env.PORT || 4777), opts.host || "127.0.0.1");
       const url = `http://localhost:${port}`;
       const list = typeof projects === "function" ? await projects() : projects;
-      console.log(`Flow Reviews is running at ${url}`);
+      console.log(`Clickthrough is running at ${url}`);
       for (const p of list) console.log(`  ${p.id.padEnd(20)} ${p.dir}`);
       if (opts.open && !opts["no-open"]) {
         const opener = process.platform === "darwin" ? "open" : process.platform === "win32" ? "start" : "xdg-open";
@@ -118,7 +119,7 @@ async function main() {
     case "projects": {
       if (pos[0] === "add") {
         const project = await addProject({
-          dir: explicitDir || ".flow-reviews",
+          dir: explicitDir || (await defaultFlowsDir()),
           id: pos[1],
           name: typeof opts.name === "string" ? opts.name : undefined,
         });
@@ -127,7 +128,7 @@ async function main() {
       if (pos[0] === "remove") return out(await removeProject(need(pos[1], "<id>")));
       if (pos[0] && pos[0] !== "list") throw new UserError(`Unknown projects command "${pos[0]}".`);
       const list = await readProjects();
-      if (!list.length) console.error(`No projects yet. Run \`flow-reviews init <flow>\` in a project. (${registryFile()})`);
+      if (!list.length) console.error(`No projects yet. Run \`clickthrough init <flow>\` in a project. (${registryFile()})`);
       return out(list);
     }
     case "init": {
@@ -288,6 +289,12 @@ async function watchComments(getTargets, onlyFlow, backlog, label) {
   await tick();
   console.error(`Watching ${onlyFlow ? `flow "${onlyFlow}" in ` : ""}${label} for new comments…`);
   setInterval(() => tick().catch((e) => console.error(e.message)), 1000);
+}
+
+/** ./.clickthrough, or a project's pre-rename ./.flow-reviews if that is what it has. */
+async function defaultFlowsDir() {
+  if (!(await exists(".clickthrough")) && (await exists(".flow-reviews"))) return ".flow-reviews";
+  return ".clickthrough";
 }
 
 async function exists(p) {

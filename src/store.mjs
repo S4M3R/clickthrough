@@ -1,5 +1,5 @@
 // Storage for flows and comments. Everything is plain JSON files inside the
-// project's flow-reviews directory, so the agent and the human see the same
+// project's .clickthrough directory, so the agent and the human see the same
 // state, and it can be committed (or ignored) like any other project file.
 
 import { promises as fs } from "node:fs";

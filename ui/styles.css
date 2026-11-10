@@ -1,4 +1,4 @@
-/* Flow Reviews: three columns (branch tree | screen stage | comment threads). */
+/* Clickthrough: three columns (branch tree | screen stage | comment threads). */
 :root {
   --bg: oklch(0.985 0.003 258);
   --panel: #ffffff;

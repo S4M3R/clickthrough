@@ -1,9 +1,9 @@
 {
-  "name": "t3-flow-reviews",
+  "name": "clickthrough",
   "version": "0.1.0",
   "description": "Review a product flow screen by screen: click any component, leave a comment, and let your coding agent make the change.",
   "type": "module",
-  "bin": { "flow-reviews": "bin/cli.mjs" },
+  "bin": { "clickthrough": "bin/cli.mjs", "flow-reviews": "bin/cli.mjs" },
   "files": ["bin", "src", "ui", "capture", "AGENTS.md", "README.md"],
   "engines": { "node": ">=18" },
   "scripts": {

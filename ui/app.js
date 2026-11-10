@@ -1,4 +1,4 @@
-// Flow Reviews web UI. Talks to the local `flow-reviews serve` API (see SPEC.md).
+// Clickthrough web UI. Talks to the local `clickthrough serve` API (see SPEC.md).
 // Vanilla ES module, no build step. All user-supplied text is set with
 // textContent, never innerHTML.
 
@@ -259,7 +259,7 @@ function renderStage() {
     empty.append(el("h3", null, scr ? "No captures for this screen yet" : "This flow has no screens yet"));
     empty.append(el("p", null, "Add a capture from your project with:"));
     const [proj, flowName] = String(state.flowId).split("/");
-    empty.append(el("pre", null, `flow-reviews screen ${flowName ?? proj} ${id || "<screen>"} --image shot.png --boxes boxes.json${flowName ? ` --project ${proj}` : ""}`));
+    empty.append(el("pre", null, `clickthrough screen ${flowName ?? proj} ${id || "<screen>"} --image shot.png --boxes boxes.json${flowName ? ` --project ${proj}` : ""}`));
     return;
   }
   frame.hidden = false;
@@ -329,9 +329,9 @@ function renderNoFlows(box) {
   box.append(el("h3", null, "No flows yet"));
   box.append(el("p", null, "Create a flow and add screen captures from your project. They show up here as soon as they're written."));
   box.append(el("pre", null,
-    "flow-reviews init onboarding --title \"Onboarding\" --start signup\n" +
-    "flow-reviews screen onboarding signup --image signup.png --boxes signup.json --title \"Sign up\"\n" +
-    "flow-reviews edge onboarding signup verify --label \"Continue with email\""));
+    "clickthrough init onboarding --title \"Onboarding\" --start signup\n" +
+    "clickthrough screen onboarding signup --image signup.png --boxes signup.json --title \"Sign up\"\n" +
+    "clickthrough edge onboarding signup verify --label \"Continue with email\""));
 }
 
 const itemKey = (it) => `${it.x},${it.y},${it.w},${it.h}`;
@@ -742,7 +742,7 @@ async function loadFlow(id, { keepScreen = true } = {}) {
   $("flowPicker").value = id;
   $("flowTitle").textContent = data.flow.title || id;
   $("crumbProject").textContent = data.project?.name ?? "";
-  document.title = `${data.flow.title || id} · Flow Reviews`;
+  document.title = `${data.flow.title || id} · Clickthrough`;
 
   const fromHash = parseRoute();
   let screen = (fromHash.flow === id && screens()[fromHash.screen] && fromHash.screen) ||
@@ -797,7 +797,7 @@ async function showHome() {
   state.flow = null;
   $("app").hidden = true;
   $("home").hidden = false;
-  document.title = "Flow Reviews";
+  document.title = "Clickthrough";
   const [projects, flows] = await Promise.all([
     api("/api/projects").catch(() => []),
     api("/api/flows").catch(() => []),
@@ -810,9 +810,9 @@ async function showHome() {
     empty.append(
       el("p", null, "No flows yet. In a project, have your coding agent capture one, or run:"),
       el("pre", null,
-        "flow-reviews init onboarding --title \"Onboarding\"\n" +
-        "flow-reviews screen onboarding signup --image signup.png --boxes signup.json\n" +
-        "flow-reviews serve")
+        "clickthrough init onboarding --title \"Onboarding\"\n" +
+        "clickthrough screen onboarding signup --image signup.png --boxes signup.json\n" +
+        "clickthrough serve")
     );
     box.appendChild(empty);
     return;

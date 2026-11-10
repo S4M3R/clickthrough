@@ -1,4 +1,4 @@
-# T3 Flow Reviews
+# Clickthrough
 
 Review a product flow screen by screen, then hand the comments to your coding
 agent.
@@ -10,7 +10,7 @@ should change. The agent reads your comments, changes the code, re-captures the
 screens and replies on each thread. New versions show up live, with the
 previous ones a click away.
 
-![Flow Reviews showing a signup flow with branches and a comment thread](docs/screenshot.png)
+![Clickthrough showing a signup flow with branches and a comment thread](docs/screenshot.png)
 
 - **Branches, not a list.** A flow is a graph: "Sign up with Google" and "Email
   and password" are separate branches, and so is each integration you can
@@ -28,9 +28,9 @@ previous ones a click away.
 - **Versions per screen.** Each re-capture is a new version with a note on what
   changed; switch between them in the toolbar.
 - **All your projects in one place.** Every project you review is registered
-  once; `flow-reviews` opens a home page listing them, and each screen has its
+  once; `clickthrough` opens a home page listing them, and each screen has its
   own URL (`/p/<project>/<flow>/<screen>`) you can bookmark or share locally.
-- **Local and plain files.** Flows live in `.flow-reviews/` in your project as
+- **Local and plain files.** Flows live in `.clickthrough/` in your project as
   JSON and images. No account, no cloud, no runtime dependencies.
 - **Made for agents.** A small CLI to add screens and edges, read comments,
   reply and resolve, and a `watch` command that prints each new comment as one
@@ -41,38 +41,38 @@ previous ones a click away.
 Needs Node 18 or newer.
 
 ```bash
-npm install -g github:S4M3R/T3-flow-reviews
+npm install -g github:S4M3R/clickthrough
 ```
 
 Then, from anywhere:
 
 ```bash
-flow-reviews          # opens the review in your browser, with every project
+clickthrough          # opens the review in your browser, with every project
 ```
 
-No install? `npx github:S4M3R/T3-flow-reviews` does the same. To see the demo
+No install? `npx github:S4M3R/clickthrough` does the same. To see the demo
 flow, clone the repo and run `npm start`.
 
 ## Projects
 
-Each project keeps its flows in its own `.flow-reviews/` folder. The first
-`flow-reviews init` in a project registers it, so `flow-reviews` shows it next to
+Each project keeps its flows in its own `.clickthrough/` folder. The first
+`clickthrough init` in a project registers it, so `clickthrough` shows it next to
 the others. Manage the list with:
 
 ```bash
-flow-reviews projects                       # list
-flow-reviews projects add web --dir ./.flow-reviews --name "Web app"
-flow-reviews projects remove web
-flow-reviews comments --project web --open  # any command works on a registered project
+clickthrough projects                       # list
+clickthrough projects add web --dir ./.clickthrough --name "Web app"
+clickthrough projects remove web
+clickthrough comments --project web --open  # any command works on a registered project
 ```
 
-The registry is `~/.config/flow-reviews/projects.json`.
+The registry is `~/.config/clickthrough/projects.json`.
 
 ## Use it with your coding agent
 
 Tell your agent (Claude Code, Codex, Cursor, T3 Code…):
 
-> Read https://github.com/S4M3R/T3-flow-reviews/blob/main/AGENTS.md, then capture
+> Read https://github.com/S4M3R/clickthrough/blob/main/AGENTS.md, then capture
 > our signup and onboarding flow with every branch, start the review server and
 > watch for my comments.
 
@@ -83,31 +83,31 @@ components, how to wire branches, and how to work through comments.
 
 ```bash
 # 1. A flow (also registers this project)
-flow-reviews init onboarding --title "Onboarding"
+clickthrough init onboarding --title "Onboarding"
 
 # 2. Screens: a screenshot, plus the component boxes measured in the page
 #    (evaluate capture/boxes.js in the page and save its output)
-flow-reviews screen onboarding signup --image signup.png --boxes signup.json --title "Create your account"
-flow-reviews screen onboarding verify --image verify.png --boxes verify.json --title "Check your email"
+clickthrough screen onboarding signup --image signup.png --boxes signup.json --title "Create your account"
+clickthrough screen onboarding verify --image verify.png --boxes verify.json --title "Check your email"
 
 # 3. Branches (--via: the component that leads there, for Navigate mode)
-flow-reviews edge onboarding signup verify --label "Email and password" --via "Create account"
+clickthrough edge onboarding signup verify --label "Email and password" --via "Create account"
 
 # 4. Review
-flow-reviews
+clickthrough
 
 # 5. Read and answer comments
-flow-reviews comments onboarding --open
-flow-reviews done onboarding c_1a2b3c "Moved it above the form" --version signup --check "npm test: 12 passed"
+clickthrough comments onboarding --open
+clickthrough done onboarding c_1a2b3c "Moved it above the form" --version signup --check "npm test: 12 passed"
 ```
 
-`flow-reviews help` lists every command. Flows default to `./.flow-reviews`;
-pass `--dir` or set `FLOW_REVIEWS_DIR` to put them elsewhere.
+`clickthrough help` lists every command. Flows default to `./.clickthrough`;
+pass `--dir` or set `CLICKTHROUGH_DIR` to put them elsewhere.
 
 ## Privacy
 
 Screenshots of your product stay on your machine, in your project. The server
-listens on `127.0.0.1` only. Add `.flow-reviews/` to your `.gitignore` if the
+listens on `127.0.0.1` only. Add `.clickthrough/` to your `.gitignore` if the
 screens should not be committed.
 
 ## Reference

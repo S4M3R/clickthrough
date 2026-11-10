@@ -1,9 +1,9 @@
-# Flow Reviews: data format, API and tree rules
+# Clickthrough: data format, API and tree rules
 
 Local-first tool to review a product flow screen by screen. An agent captures
 screens (screenshot + element boxes) and wires them into a flow graph; a human
 opens the local web UI, walks the flow's branches, clicks any component and
-leaves a comment; the agent reads comments (or is woken by `flow-reviews watch`),
+leaves a comment; the agent reads comments (or is woken by `clickthrough watch`),
 changes the code, re-captures, and replies/resolves.
 
 Zero runtime dependencies. Node >= 18. ESM.
@@ -11,7 +11,7 @@ Zero runtime dependencies. Node >= 18. ESM.
 ## Data layout (inside the user's project)
 
 ```
-.flow-reviews/                 (default --dir; configurable)
+.clickthrough/                 (default --dir; configurable)
   <flow-id>/
     flow.json
     comments.json
@@ -76,7 +76,7 @@ Zero runtime dependencies. Node >= 18. ESM.
 Navigate mode makes a component clickable when its label equals or starts with
 an outgoing edge's `via` (or, for edges without `via`, its `label`).
 
-Replies written by `flow-reviews done` carry `evidence`, and the comment gets
+Replies written by `clickthrough done` carry `evidence`, and the comment gets
 `resolvedBy: "agent"` and `resolvedAt`:
 
 ```json
@@ -112,9 +112,9 @@ Versions are NOT tree nodes: the screen toolbar has a version control
 
 ## Projects
 
-A project is `{id, name, dir}` in `~/.config/flow-reviews/projects.json`
-(`$FLOW_REVIEWS_HOME` overrides the folder). `dir` is the project's flows folder.
-`flow-reviews serve` serves every registered project (re-read on each listing);
+A project is `{id, name, dir}` in `~/.config/clickthrough/projects.json`
+(`$CLICKTHROUGH_HOME` overrides the folder). `dir` is the project's flows folder.
+`clickthrough serve` serves every registered project (re-read on each listing);
 `--dir` / `--project` serve just one. In the API a flow is addressed by the key
 `<project>/<flow>`, URL-encoded as one path segment (`web%2Fonboarding`).
 
@@ -125,7 +125,7 @@ A project is `{id, name, dir}` in `~/.config/flow-reviews/projects.json`
 - `/p/<project>/<flow>/<screen>`: a screen. Older `#<key>/<screen>` links still
   resolve.
 
-## HTTP API (served by `flow-reviews serve`, default port 4777)
+## HTTP API (served by `clickthrough serve`, default port 4777)
 
 | Method | Path | Body / result |
 |---|---|---|
@@ -142,21 +142,21 @@ A project is `{id, name, dir}` in `~/.config/flow-reviews/projects.json`
 
 All JSON. Errors: `{error}` with 4xx/5xx.
 
-## CLI (`flow-reviews`)
+## CLI (`clickthrough`)
 
 ```
-flow-reviews                                     # = serve --open, every project
-flow-reviews serve   [--port 4777] [--open] [--dir … | --project …]
-flow-reviews projects [add [<id>] [--dir] [--name] | remove <id>]
-flow-reviews init    <flow> --title "Acme onboarding" [--start <screen>]
-flow-reviews screen  <flow> <screen> --image shot.png [--boxes boxes.json] [--title ..] [--route ..] [--note "what changed"]
-flow-reviews edge    <flow> <from> <to> --label "Sign up with Google" [--via "Sign up with Google"]
-flow-reviews comments [<flow>] [--open]          # JSON to stdout
-flow-reviews reply   <flow> <comment-id> "text"   # author: agent
-flow-reviews done    <flow> <comment-id> "text" [--version <screen>[@v]] [--image f] [--link url --label l] [--check "…"]
-flow-reviews resolve <flow> <comment-id> [--reopen]
-flow-reviews watch   [<flow>] [--all]             # one JSON line per new reviewer comment/reply; never exits
-flow-reviews boxes-script                          # prints the path of capture/boxes.js
+clickthrough                                     # = serve --open, every project
+clickthrough serve   [--port 4777] [--open] [--dir … | --project …]
+clickthrough projects [add [<id>] [--dir] [--name] | remove <id>]
+clickthrough init    <flow> --title "Acme onboarding" [--start <screen>]
+clickthrough screen  <flow> <screen> --image shot.png [--boxes boxes.json] [--title ..] [--route ..] [--note "what changed"]
+clickthrough edge    <flow> <from> <to> --label "Sign up with Google" [--via "Sign up with Google"]
+clickthrough comments [<flow>] [--open]          # JSON to stdout
+clickthrough reply   <flow> <comment-id> "text"   # author: agent
+clickthrough done    <flow> <comment-id> "text" [--version <screen>[@v]] [--image f] [--link url --label l] [--check "…"]
+clickthrough resolve <flow> <comment-id> [--reopen]
+clickthrough watch   [<flow>] [--all]             # one JSON line per new reviewer comment/reply; never exits
+clickthrough boxes-script                          # prints the path of capture/boxes.js
 ```
 
 `--boxes` takes the JSON string produced by evaluating `capture/boxes.js` in the

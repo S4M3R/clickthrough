@@ -1,6 +1,6 @@
-// The project registry: every project you review, so one `flow-reviews serve`
-// shows all of them. Stored in ~/.config/flow-reviews/projects.json (override
-// the folder with $FLOW_REVIEWS_HOME). Deliberately not ~/.flow-reviews, which
+// The project registry: every project you review, so one `clickthrough serve`
+// shows all of them. Stored in ~/.config/clickthrough/projects.json (override
+// the folder with $CLICKTHROUGH_HOME). Deliberately not ~/.clickthrough, which
 // is what a project's own flows folder is called. A project is just a name and the folder that
 // holds its flows; the flows themselves stay in that project.
 
@@ -9,14 +9,35 @@ import os from "node:os";
 import path from "node:path";
 import { UserError, assertId } from "./store.mjs";
 
+const configDir = () => process.env.XDG_CONFIG_HOME || path.join(os.homedir(), ".config");
+
 export function registryFile() {
-  const home =
-    process.env.FLOW_REVIEWS_HOME ||
-    path.join(process.env.XDG_CONFIG_HOME || path.join(os.homedir(), ".config"), "flow-reviews");
+  const home = process.env.CLICKTHROUGH_HOME || process.env.FLOW_REVIEWS_HOME || path.join(configDir(), "clickthrough");
   return path.join(home, "projects.json");
 }
 
+/** Pre-rename registry (the tool used to be called Flow Reviews). */
+function legacyRegistryFile() {
+  if (process.env.CLICKTHROUGH_HOME || process.env.FLOW_REVIEWS_HOME) return null;
+  return path.join(configDir(), "flow-reviews", "projects.json");
+}
+
 export async function readProjects() {
+  // First run after the rename: carry the old project list over once.
+  const legacy = legacyRegistryFile();
+  if (legacy) {
+    try {
+      await fs.access(registryFile());
+    } catch {
+      try {
+        const old = await fs.readFile(legacy, "utf8");
+        await fs.mkdir(path.dirname(registryFile()), { recursive: true });
+        await fs.writeFile(registryFile(), old);
+      } catch {
+        /* no old registry either */
+      }
+    }
+  }
   try {
     const data = JSON.parse(await fs.readFile(registryFile(), "utf8"));
     return Array.isArray(data.projects) ? data.projects : [];
@@ -38,8 +59,8 @@ async function writeProjects(projects) {
 export function defaultProjectId(dir) {
   const abs = path.resolve(dir);
   const base = path.basename(abs).replace(/^\./, "");
-  // ./.flow-reviews -> the folder that contains it; anything else -> itself.
-  const name = base === "flow-reviews" ? path.basename(path.dirname(abs)) : path.basename(abs);
+  // ./.clickthrough (or the old ./.flow-reviews) -> the folder that contains it; anything else -> itself.
+  const name = base === "clickthrough" || base === "flow-reviews" ? path.basename(path.dirname(abs)) : path.basename(abs);
   return slug(name) || "project";
 }
 
@@ -84,6 +105,6 @@ export async function removeProject(id) {
 
 export async function findProject(id) {
   const p = (await readProjects()).find((x) => x.id === id);
-  if (!p) throw new UserError(`No project "${id}". See \`flow-reviews projects\`.`, 404);
+  if (!p) throw new UserError(`No project "${id}". See \`clickthrough projects\`.`, 404);
   return p;
 }
