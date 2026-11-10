@@ -49,11 +49,15 @@ Each user choice that leads somewhere different is an edge with a label in the
 user's words:
 
 ```bash
-flow-reviews edge <flow> signup verify --label "Email and password"
-flow-reviews edge <flow> signup workspace --label "Google or GitHub"
-flow-reviews edge <flow> connect connect-stripe --label "Stripe"
-flow-reviews edge <flow> connect connect-postgres --label "Postgres"
+flow-reviews edge <flow> signup verify --label "Email and password" --via "Create account"
+flow-reviews edge <flow> signup google --label "Sign up with Google" --via "Sign up with Google"
+flow-reviews edge <flow> connect connect-stripe --label "Stripe" --via "Stripe"
 ```
+
+`--via` is the visible text of the component the user clicks to get there (a
+prefix is enough: "Import" matches "Import 3 agents"). The reviewer's Navigate
+mode follows it, so they can click through the screens like the real app. Give
+every edge a `--via` when a component triggers it.
 
 - One edge per real choice. Integrations, sign-in methods, plan types, roles,
   empty vs full accounts: each is its own branch.
@@ -61,8 +65,10 @@ flow-reviews edge <flow> connect connect-postgres --label "Postgres"
   "continues at …" rather than duplicating it.
 - `flow-reviews init <flow> --start <screen>` sets the first screen (otherwise
   the first screen you added).
-- If a branch needs credentials you do not have, capture as far as you can and
-  say in the screen's `--note` where it stops.
+- If a branch needs credentials you do not have, or passes through a third-party
+  page (Google sign-in, Stripe checkout), capture as far as you can and add a
+  clearly labeled placeholder screen for the part you cannot capture, so the
+  branch still reads end to end. Say what it stands for in `--note`.
 
 ## 3. Start the review
 

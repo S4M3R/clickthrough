@@ -42,7 +42,7 @@ Zero runtime dependencies. Node >= 18. ESM.
     }
   },
   "edges": [
-    { "from": "welcome", "to": "form", "label": "Sign up manually" },
+    { "from": "welcome", "to": "form", "label": "Sign up manually", "via": "Sign up manually" },
     { "from": "welcome", "to": "agent-signup", "label": "Sign up with an agent" }
   ]
 }
@@ -71,6 +71,10 @@ Zero runtime dependencies. Node >= 18. ESM.
   }
 ]
 ```
+
+`via` (optional) is the visible text of the component that triggers the edge.
+Navigate mode makes a component clickable when its label equals or starts with
+an outgoing edge's `via` (or, for edges without `via`, its `label`).
 
 `target` may be null (comment on the whole screen). `status`: `open` | `resolved`.
 
@@ -130,7 +134,7 @@ flow-reviews serve   [--port 4777] [--open] [--dir … | --project …]
 flow-reviews projects [add [<id>] [--dir] [--name] | remove <id>]
 flow-reviews init    <flow> --title "Acme onboarding" [--start <screen>]
 flow-reviews screen  <flow> <screen> --image shot.png [--boxes boxes.json] [--title ..] [--route ..] [--note "what changed"]
-flow-reviews edge    <flow> <from> <to> --label "Sign up with Google"
+flow-reviews edge    <flow> <from> <to> --label "Sign up with Google" [--via "Sign up with Google"]
 flow-reviews comments [<flow>] [--open]          # JSON to stdout
 flow-reviews reply   <flow> <comment-id> "text"   # author: agent
 flow-reviews resolve <flow> <comment-id> [--reopen]

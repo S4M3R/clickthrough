@@ -148,13 +148,21 @@ export class Store {
     return { screen: screenId, version };
   }
 
-  async addEdge(flowId, from, to, label = "") {
+  /**
+   * Connect two screens. `label` names the choice in the tree ("Sign up with
+   * Google"); `via` is the visible text of the component that triggers it, so
+   * Navigate mode can follow a click on that component (defaults to matching
+   * the label).
+   */
+  async addEdge(flowId, from, to, label = "", via = "") {
     assertId("screen", from);
     assertId("screen", to);
     const flow = await this.readFlow(flowId);
     const existing = flow.edges.find((e) => e.from === from && e.to === to);
-    if (existing) existing.label = label || existing.label;
-    else flow.edges.push({ from, to, label });
+    if (existing) {
+      existing.label = label || existing.label;
+      if (via) existing.via = via;
+    } else flow.edges.push(via ? { from, to, label, via } : { from, to, label });
     await this.writeFlow(flow);
     return flow.edges;
   }

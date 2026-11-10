@@ -38,7 +38,7 @@
       <p class="flow-title" id="flowTitle"></p>
     </div>
     <nav id="tree" class="tree-wrap" aria-label="Screens"></nav>
-    <div class="nav-foot">Click any component to comment. <kbd>&larr;</kbd> <kbd>&rarr;</kbd> move through the flow.</div>
+    <div class="nav-foot"><kbd>C</kbd> comment, <kbd>N</kbd> navigate: click through the screens like the real app. <kbd>&larr;</kbd> <kbd>&rarr;</kbd> move along the flow.</div>
   </aside>
 
   <main class="main">
@@ -49,6 +49,10 @@
       </div>
       <div class="bar-tools">
         <div class="seg" id="versions" role="group" aria-label="Version" hidden></div>
+        <div class="seg" id="mode" role="group" aria-label="Mode">
+          <button type="button" data-mode="comment" title="Click a component to comment on it (C)">Comment</button>
+          <button type="button" data-mode="navigate" title="Click a component to follow it, like using the app (N)">Navigate</button>
+        </div>
         <label class="toggle"><input type="checkbox" id="outline"> Outline components</label>
         <button type="button" class="btn" id="commentScreen">Comment on screen</button>
         <div class="nav-btns">

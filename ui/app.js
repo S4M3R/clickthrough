@@ -272,6 +272,7 @@ function renderStage() {
   img.width = v.W;
   img.height = v.H;
   frame.style.aspectRatio = `${v.W} / ${v.H}`;
+  frame.classList.toggle("navigate", state.mode === "navigate");
   frame.appendChild(img);
 
   const pct = (n, d) => `${(n / d) * 100}%`;
@@ -283,12 +284,21 @@ function renderStage() {
     h.style.top = pct(it.y, v.H);
     h.style.width = pct(it.w, v.W);
     h.style.height = pct(it.h, v.H);
-    h.setAttribute("aria-label", `Comment on ${targetLabel(it)}`);
-    h.addEventListener("mouseenter", (e) => showTip(e, it));
+    const link = state.mode === "navigate" ? edgeForItem(it) : null;
+    if (state.mode === "navigate") h.classList.add(link ? "go" : "dead");
+    const dest = link ? screens()[link.to]?.title || link.to : null;
+    h.setAttribute("aria-label", link ? `${targetLabel(it)}: go to ${dest}` : `Comment on ${targetLabel(it)}`);
+    if (state.mode === "navigate" && !link) h.tabIndex = -1;
+    h.addEventListener("mouseenter", (e) => showTip(e, it, dest));
     h.addEventListener("mousemove", moveTip);
     h.addEventListener("mouseleave", hideTip);
-    h.addEventListener("click", () => openPopover(it, h));
-    h.tabIndex = 0;
+    h.addEventListener("click", () => {
+      if (state.mode !== "navigate") return openPopover(it, h);
+      hideTip();
+      if (link) selectScreen(link.to);
+      else toast("This doesn't lead anywhere in the flow yet. Switch to Comment to say where it should go.");
+    });
+    if (h.tabIndex !== -1) h.tabIndex = 0;
     h.dataset.idx = String(i);
     frame.appendChild(h);
   });
@@ -326,10 +336,34 @@ function renderNoFlows(box) {
 
 const itemKey = (it) => `${it.x},${it.y},${it.w},${it.h}`;
 
-function showTip(e, it) {
+// ---------- Navigate mode ----------
+// An edge can name the component that triggers it (`via`, e.g. "Sign up with
+// Google"); otherwise its label is matched against the component's text.
+const norm = (x) => String(x ?? "").toLowerCase().replace(/\s+/g, " ").trim();
+function edgeForItem(it) {
+  const label = norm(it.l);
+  if (!label) return null;
+  const out = edges().filter((e) => e.from === state.screenId && screens()[e.to]);
+  return (
+    out.find((e) => e.via && (label === norm(e.via) || label.startsWith(norm(e.via)))) ||
+    out.find((e) => !e.via && e.label && (label === norm(e.label) || (norm(e.label).length >= 3 && label.startsWith(norm(e.label))))) ||
+    null
+  );
+}
+function setMode(mode) {
+  state.mode = mode === "navigate" ? "navigate" : "comment";
+  store.set("fr-mode", state.mode);
+  document.querySelectorAll("#mode [data-mode]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.mode === state.mode)));
+  closePopover();
+  renderStage();
+}
+
+function showTip(e, it, dest = null) {
+  if (state.mode === "navigate" && !dest) return;
   const t = $("tip");
   t.textContent = "";
-  t.append(el("span", "k", it.k), document.createTextNode(it.l || "(no text)"));
+  if (dest) t.append(el("span", "k", "Go to"), el("span", "go-to", dest));
+  else t.append(el("span", "k", it.k), document.createTextNode(it.l || "(no text)"));
   t.hidden = false;
   moveTip(e);
 }
@@ -704,6 +738,9 @@ $("next").onclick = () => step(1);
 $("outline").onchange = (e) => { $("frame").classList.toggle("show", e.target.checked); store.set("fr-outline", e.target.checked ? "1" : ""); };
 $("outline").checked = !!store.get("fr-outline");
 $("commentScreen").onclick = () => openPopover(null, $("commentScreen"));
+document.querySelectorAll("#mode [data-mode]").forEach((b) => { b.onclick = () => setMode(b.dataset.mode); });
+state.mode = store.get("fr-mode") === "navigate" ? "navigate" : "comment";
+document.querySelectorAll("#mode [data-mode]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.mode === state.mode)));
 $("popCancel").onclick = closePopover;
 $("popSubmit").onclick = submitPopover;
 $("popText").addEventListener("input", (e) => { if (state.draft) state.draft.text = e.target.value; });
@@ -729,6 +766,7 @@ $("togglePanel").onclick = () => {
 };
 document.addEventListener("keydown", (e) => {
   if (e.target.closest("input, textarea, select")) return;
+  if (!e.metaKey && !e.ctrlKey && !e.altKey && (e.key === "n" || e.key === "c")) setMode(e.key === "n" ? "navigate" : "comment");
   if (e.key === "ArrowRight") step(1);
   if (e.key === "ArrowLeft") step(-1);
   if (e.key === "Escape") closePopover();

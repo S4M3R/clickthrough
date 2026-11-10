@@ -181,3 +181,13 @@ a.brand-row { color: inherit; text-decoration: none; }
 .home-empty pre { font-family: var(--mono); font-size: 12.5px; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 12px; overflow-x: auto; color: var(--fg); }
 .home-head .brand-row { display: inline-flex; align-items: center; gap: 8px; }
 .home-head h1 { margin: 0; font-size: 15px; font-weight: 600; }
+
+/* Navigate mode: components that lead somewhere get a dashed outline, the rest go quiet. */
+.frame.navigate .hs { cursor: default; }
+.frame.navigate .hs:hover, .frame.navigate .hs:focus-visible { outline-color: transparent; background: transparent; }
+.frame.navigate .hs.go { cursor: pointer; outline: 1.5px dashed oklch(0.55 0.2 258 / 0.55); z-index: 4; }
+.frame.navigate .hs.go:hover, .frame.navigate .hs.go:focus-visible { outline: 2px solid var(--accent); background: oklch(0.55 0.2 258 / 0.10); }
+.frame.navigate .pin { opacity: 0.35; pointer-events: none; }
+.tip .go-to { color: var(--accent-fg); font-weight: 600; }
+/* Areas that lead nowhere must not swallow clicks meant for a linked component under them. */
+.frame.navigate .hs.dead { pointer-events: none; }

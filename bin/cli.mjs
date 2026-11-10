@@ -23,7 +23,8 @@ Usage:
   flow-reviews init     <flow> --title "Onboarding" [--start <screen>]
   flow-reviews screen   <flow> <screen> --image shot.png [--boxes boxes.json]
                         [--title "Create account"] [--route /signup] [--note "what changed"]
-  flow-reviews edge     <flow> <from> <to> --label "Sign up with Google"
+  flow-reviews edge     <flow> <from> <to> --label "Sign up with Google" [--via "Sign up with Google"]
+                        (--via: text of the component that leads there, for Navigate mode)
   flow-reviews unedge   <flow> <from> <to>
   flow-reviews comments [<flow>] [--open]           Print comments as JSON
   flow-reviews reply    <flow> <comment-id> "text"  Reply as the agent
@@ -151,7 +152,8 @@ async function main() {
     case "edge":
       return out(
         await store.addEdge(need(pos[0], "<flow>"), need(pos[1], "<from>"), need(pos[2], "<to>"),
-          typeof opts.label === "string" ? opts.label : "")
+          typeof opts.label === "string" ? opts.label : "",
+          typeof opts.via === "string" ? opts.via : "")
       );
     case "unedge":
       return out(await store.removeEdge(need(pos[0], "<flow>"), need(pos[1], "<from>"), need(pos[2], "<to>")));

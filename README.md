@@ -16,6 +16,9 @@ previous ones a click away.
   and password" are separate branches, and so is each integration you can
   connect. Where branches meet again, the tree says so instead of repeating
   screens.
+- **Comment or navigate.** In Comment mode a click on a component starts a
+  comment. In Navigate mode (press `N`) the screens behave like the app: click
+  "Sign up with Google" and you are on the next screen of that branch.
 - **Comment on the component, not the screenshot.** Every component is a click
   target, so a comment says "Button: Continue with GitHub", not "somewhere top
   left".
@@ -84,8 +87,8 @@ flow-reviews init onboarding --title "Onboarding"
 flow-reviews screen onboarding signup --image signup.png --boxes signup.json --title "Create your account"
 flow-reviews screen onboarding verify --image verify.png --boxes verify.json --title "Check your email"
 
-# 3. Branches
-flow-reviews edge onboarding signup verify --label "Email and password"
+# 3. Branches (--via: the component that leads there, for Navigate mode)
+flow-reviews edge onboarding signup verify --label "Email and password" --via "Create account"
 
 # 4. Review
 flow-reviews
