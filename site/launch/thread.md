@@ -44,7 +44,7 @@ When it is done, the thread says Done and shows the evidence: the new version of
 
 It is a Node CLI with zero dependencies and a local web page. Flows are JSON and images in your repo. No account, nothing leaves your machine. MIT.
 
-npm install -g github:S4M3R/clickthrough
+npm install -g clickthrough
 
 https://clickthrough.agustin.build
 https://github.com/S4M3R/clickthrough

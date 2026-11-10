@@ -1,5 +1,9 @@
 # Clickthrough
 
+[![npm](https://img.shields.io/npm/v/clickthrough)](https://www.npmjs.com/package/clickthrough)
+[![license](https://img.shields.io/github/license/S4M3R/clickthrough)](LICENSE)
+[![node](https://img.shields.io/node/v/clickthrough)](package.json)
+
 Review a product flow screen by screen, then hand the comments to your coding
 agent.
 
@@ -44,7 +48,7 @@ The recording uses a made-up product; the scripts that produce it are in
 Needs Node 18 or newer.
 
 ```bash
-npm install -g github:S4M3R/clickthrough
+npm install -g clickthrough
 ```
 
 Then, from anywhere:
@@ -53,7 +57,7 @@ Then, from anywhere:
 clickthrough          # opens the review in your browser, with every project
 ```
 
-No install? `npx github:S4M3R/clickthrough` does the same. To see the demo
+No install? `npx clickthrough` does the same. To see the demo
 flow, clone the repo and run `npm start`.
 
 ## Projects

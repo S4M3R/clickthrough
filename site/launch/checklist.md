@@ -1,8 +1,8 @@
 # Launch-day checklist
 
 Done so far: the Vercel project has `clickthrough.agustin.build` attached and a
-production deploy, and `clickthrough@0.1.0` was submitted to npm. Not done: the
-DNS record, the release of the staged npm version, and the post.
+production deploy, and `clickthrough@0.1.0` is on npm. Not done: the DNS
+record, the repository settings below, and the post.
 
 ## Before the post
 
@@ -21,30 +21,13 @@ DNS record, the release of the staged npm version, and the post.
 
 ### 2. npm
 
-`clickthrough@0.1.0` was submitted with `npm publish` on 2026-11-10 from the
-`s4m3r` account. npm put it in a staged release: the registry shows a
-placeholder (`0.0.0-stage`, "awaiting a staged release") until that is released.
-
-- [ ] Open https://www.npmjs.com/package/clickthrough while signed in and
-      release the staged `0.1.0` if npm asks for it.
-- [ ] Confirm: `npm view clickthrough version` prints `0.1.0`, and
-      `npx clickthrough help` prints the usage.
-- [ ] Only then switch the install line everywhere to `npm install -g clickthrough`
-      (and `npx clickthrough`): `README.md`, `AGENTS.md`, `site/index.html`
-      (three commands and their `data-copy` attributes),
-      `site/launch/post.md`, `site/launch/thread.md`. Redeploy the site.
+- [x] `clickthrough@0.1.0` is published (`npm view clickthrough version` prints `0.1.0`).
+- [x] Install lines everywhere use `npm install -g clickthrough` and `npx clickthrough`.
+- [ ] For the next release: bump `version`, `npm test`, `npm pack --dry-run`, `npm publish`.
 
 ### 3. Repository
 
-- [ ] Merge the landing-site PR, so the demo GIF at the top of the README and
-      the `site/demo` link on the landing page resolve on `main`.
-- [ ] Badges under the README title (after the npm publish):
-
-      ```markdown
-      [![npm](https://img.shields.io/npm/v/clickthrough)](https://www.npmjs.com/package/clickthrough)
-      [![license](https://img.shields.io/github/license/S4M3R/clickthrough)](LICENSE)
-      [![node](https://img.shields.io/node/v/clickthrough)](package.json)
-      ```
+- [x] The landing-site PR is merged; the README opens with badges and the demo GIF.
 
 - [ ] Website and topics:
 
