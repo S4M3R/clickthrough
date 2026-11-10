@@ -1,41 +1,37 @@
 # Launch-day checklist
 
-Nothing here has been done for you: no post was sent, nothing was published
-to npm, and no domain or DNS record was changed.
+Done so far: the Vercel project has `clickthrough.agustin.build` attached and a
+production deploy, and `clickthrough@0.1.0` was submitted to npm. Not done: the
+DNS record, the release of the staged npm version, and the post.
 
 ## Before the post
 
 ### 1. Domain
 
-- [ ] Approve the subdomain. Proposed: `clickthrough.agustin.build` (same
-      pattern as `relay.agustin.build` and `cleanly.agustin.build`).
-- [ ] Add it to the Vercel project (team `s4m3rs-projects`, project `clickthrough`):
-
-      ```bash
-      cd site
-      vercel domains add clickthrough.agustin.build --scope s4m3rs-projects
-      ```
-
-- [ ] `agustin.build` uses third-party nameservers, so add the DNS record at
-      the DNS provider: `CNAME clickthrough -> cname.vercel-dns.com` (use the
-      exact value `vercel domains inspect clickthrough.agustin.build` prints).
-- [ ] Deploy to production: `vercel deploy --prod --scope s4m3rs-projects`
-      (from `site/`).
+- [x] `clickthrough.agustin.build` is attached to the Vercel project
+      (team `s4m3rs-projects`, project `clickthrough`) and production is deployed.
+- [ ] Add the DNS record. `agustin.build` is on Cloudflare; run
+      `vercel domains verify clickthrough.agustin.build --scope s4m3rs-projects`
+      from `site/` and open the Domain Connect link it prints, or add the
+      CNAME it asks for by hand.
+- [ ] After DNS resolves, check https://clickthrough.agustin.build loads.
 - [ ] If you pick another domain, replace `clickthrough.agustin.build` in
       `site/index.html` (canonical, `og:url`, `og:image`, `twitter:image`) and
       in `site/launch/*.md`.
 
 ### 2. npm
 
-`clickthrough` was free on npm when checked (`npm view clickthrough` returned 404).
+`clickthrough@0.1.0` was submitted with `npm publish` on 2026-11-10 from the
+`s4m3r` account. npm put it in a staged release: the registry shows a
+placeholder (`0.0.0-stage`, "awaiting a staged release") until that is released.
 
-- [ ] Check again: `npm view clickthrough`
-- [ ] Look at what ships: `npm pack --dry-run` (12 files, about 35 kB; `site/` is not included)
-- [ ] `npm test`
-- [ ] `npm publish --access public`
-- [ ] Then switch the install line everywhere to `npm install -g clickthrough`
+- [ ] Open https://www.npmjs.com/package/clickthrough while signed in and
+      release the staged `0.1.0` if npm asks for it.
+- [ ] Confirm: `npm view clickthrough version` prints `0.1.0`, and
+      `npx clickthrough help` prints the usage.
+- [ ] Only then switch the install line everywhere to `npm install -g clickthrough`
       (and `npx clickthrough`): `README.md`, `AGENTS.md`, `site/index.html`
-      (four places: three commands and the `data-copy` attributes),
+      (three commands and their `data-copy` attributes),
       `site/launch/post.md`, `site/launch/thread.md`. Redeploy the site.
 
 ### 3. Repository
