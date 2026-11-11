@@ -6,7 +6,7 @@ Screen recording of Clickthrough. A list of projects opens a signup flow shown a
 
 **og.png (link card)**
 
-Clickthrough. Headline: "Click the button that's wrong. Your coding agent fixes it." Next to it, a comment on a signup screen's GitHub button, marked Done by the agent with a new version, a screenshot, a PR link and a passing check.
+Clickthrough. Headline: "Click what's wrong. Your agent fixes it." Next to it, a comment on a signup screen's GitHub button, marked Done by the agent with a new version, a screenshot, a PR link and a passing check.
 
 **tree.png**
 
