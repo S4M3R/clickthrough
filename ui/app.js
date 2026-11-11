@@ -443,7 +443,7 @@ function compareFooter(c) {
   const reply = el("button", "btn", "Reply");
   reply.type = "button";
   reply.title = "Say what is not right (R)";
-  reply.onclick = () => document.querySelector(`.thread[data-id="${CSS.escape(c.id)}"] .th-actions input[type="text"]`)?.focus();
+  reply.onclick = () => document.querySelector(`.thread[data-id="${CSS.escape(c.id)}"] .reply-input`)?.focus();
   acts.appendChild(reply);
   if (needsCheck(c)) {
     const ok = el("button", "btn primary", "Looks good");
@@ -733,6 +733,26 @@ function drawThumbs(box, images, redraw) {
   });
 }
 
+// Line icons for the reply box and the comment box.
+const PAPERCLIP = "M13.2 7.3l-5 5a3.1 3.1 0 0 1-4.4-4.4l5.3-5.3a2.1 2.1 0 0 1 3 3L6.9 10.8a1.05 1.05 0 0 1-1.5-1.5l4.6-4.6";
+const ARROW_UP = "M8 12.7V3.5M4.2 7.2L8 3.4l3.8 3.8";
+function lineIcon(d) {
+  const ns = "http://www.w3.org/2000/svg";
+  const svg = document.createElementNS(ns, "svg");
+  svg.setAttribute("viewBox", "0 0 16 16");
+  svg.setAttribute("class", "line-icon");
+  svg.setAttribute("aria-hidden", "true");
+  const p = document.createElementNS(ns, "path");
+  p.setAttribute("d", d);
+  svg.appendChild(p);
+  return svg;
+}
+// A text box as tall as what is typed in it, up to a few lines.
+function grow(ta) {
+  ta.style.height = "auto";
+  ta.style.height = `${Math.min(ta.scrollHeight, 132)}px`;
+}
+
 // The reply being written on a thread: kept here so a live update does not lose it.
 function replyDraft(id) {
   state.replies ??= {};
@@ -836,28 +856,33 @@ function renderThreads() {
       card.appendChild(reps);
     }
 
+    // The reply box: one bordered field that grows with the text, with its
+    // attachments above and attach / send inside it.
     const draft = replyDraft(c.id);
-    const thumbs = el("div", "pop-images th-images");
-    const redraw = () => drawThumbs(thumbs, draft.images, redraw);
+    const composer = el("div", "composer");
+    composer.addEventListener("click", (e) => e.stopPropagation());
+    const thumbs = el("div", "pop-images");
+    const input = el("textarea", "reply-input");
+    const send = el("button", "send");
+    const ready = () => { send.disabled = !input.value.trim() && !draft.images.some((x) => x.path); };
+    const redraw = () => { drawThumbs(thumbs, draft.images, redraw); ready(); };
     const attach = (files) => uploadInto(draft.images, files, () => state.replies?.[c.id] === draft, redraw);
-    redraw();
-    card.appendChild(thumbs);
 
-    const actions = el("div", "th-actions");
-    const input = el("input");
-    input.type = "text";
+    input.rows = 1;
     input.value = draft.text;
-    input.placeholder = pending ? "Not right? Say what to change" : "Reply";
-    input.title = "Paste or drop an image to attach it";
+    input.placeholder = pending ? "Not right? Say what to change…" : "Reply…";
     input.setAttribute("aria-label", `Reply to comment ${num}`);
-    input.addEventListener("click", (e) => e.stopPropagation());
-    input.addEventListener("input", () => { draft.text = input.value; });
-    input.addEventListener("keydown", (e) => { if (e.key === "Enter") sendReply(c, input); });
+    input.addEventListener("input", () => { draft.text = input.value; grow(input); ready(); });
+    input.addEventListener("keydown", (e) => {
+      // Enter sends, Shift+Enter starts a new line.
+      if (e.key === "Enter" && !e.shiftKey && !e.isComposing) { e.preventDefault(); sendReply(c, input); }
+    });
     input.addEventListener("paste", (e) => {
       const files = [...(e.clipboardData?.files ?? [])].filter((f) => f.type.startsWith("image/"));
       if (files.length) { e.preventDefault(); attach(files); }
     });
-    const clip = el("label", "btn icon attach");
+
+    const clip = el("label", "icon-btn");
     clip.title = "Attach images (or paste / drop them)";
     const file = el("input");
     file.type = "file";
@@ -865,10 +890,19 @@ function renderThreads() {
     file.multiple = true;
     file.hidden = true;
     file.addEventListener("change", () => { attach([...file.files]); file.value = ""; });
-    const glyph = el("span", null, "\u{1F4CE}");
-    glyph.setAttribute("aria-hidden", "true");
-    clip.append(file, glyph, el("span", "sr-only", "Attach images"));
-    clip.addEventListener("click", (e) => e.stopPropagation());
+    clip.append(file, lineIcon(PAPERCLIP), el("span", "sr-only", "Attach images"));
+
+    send.type = "button";
+    send.title = "Send (Enter)";
+    send.append(lineIcon(ARROW_UP), el("span", "sr-only", "Send reply"));
+    send.onclick = () => sendReply(c, input);
+
+    const bar = el("div", "composer-bar");
+    bar.append(clip, el("span", "hint", "Enter to send"), send);
+    composer.append(thumbs, input, bar);
+    card.appendChild(composer);
+    redraw();
+
     card.addEventListener("dragover", (e) => { e.preventDefault(); card.classList.add("dragging"); });
     card.addEventListener("dragleave", () => card.classList.remove("dragging"));
     card.addEventListener("drop", (e) => {
@@ -876,6 +910,8 @@ function renderThreads() {
       card.classList.remove("dragging");
       attach([...(e.dataTransfer?.files ?? [])]);
     });
+
+    const actions = el("div", "th-actions");
     const toggle = el("button", pending ? "btn primary" : "btn", pending ? "Looks good" : c.status === "resolved" ? "Reopen" : "Resolve");
     toggle.type = "button";
     toggle.onclick = (e) => {
@@ -883,15 +919,16 @@ function renderThreads() {
       if (pending) confirmChange(c);
       else setStatus(c, c.status === "resolved" ? "open" : "resolved");
     };
-    actions.append(input, clip, toggle);
+    actions.appendChild(toggle);
     card.appendChild(actions);
 
     card.onclick = () => lightComment(c.id, false);
     box.appendChild(card);
+    grow(input);
   }
   box.scrollTop = scrollTop;
   if (typing) {
-    const again = box.querySelector(`.thread[data-id="${CSS.escape(typing)}"] .th-actions input[type="text"]`);
+    const again = box.querySelector(`.thread[data-id="${CSS.escape(typing)}"] .reply-input`);
     if (again) { again.focus(); try { again.setSelectionRange(caret[0], caret[1]); } catch { /* not a text field */ } }
   }
 }
@@ -1250,7 +1287,8 @@ $("popover").addEventListener("drop", (e) => {
   $("popover").classList.remove("dragging");
   attachFiles([...(e.dataTransfer?.files ?? [])]);
 });
-$("popText").addEventListener("input", (e) => { if (state.draft) state.draft.text = e.target.value; });
+$("popText").addEventListener("input", (e) => { if (state.draft) state.draft.text = e.target.value; grow(e.target); });
+$("popAttachIcon").replaceWith(lineIcon(PAPERCLIP));
 $("popText").addEventListener("keydown", (e) => {
   if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) { e.preventDefault(); submitPopover(); }
   if (e.key === "Escape") closePopover();
@@ -1288,7 +1326,7 @@ document.addEventListener("keydown", (e) => {
     }
     if (cur && e.key === "r") {
       e.preventDefault();
-      return document.querySelector(`.thread[data-id="${CSS.escape(cur.c.id)}"] .th-actions input[type="text"]`)?.focus();
+      return document.querySelector(`.thread[data-id="${CSS.escape(cur.c.id)}"] .reply-input`)?.focus();
     }
   }
   if (e.key === "ArrowRight") step(1);
