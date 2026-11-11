@@ -135,13 +135,11 @@ await new Promise((resolve, reject) => {
 await ui.locator(".status-check").waitFor();
 await sleep(2000);
 
-// 5. The finished comment is waiting under Changes: open it, compare with the
-//    version the comment was left on, then accept it
+// 5. The finished comment is waiting under Changes: open it to see the screen
+//    before and after, then accept it from the list
 await click(ui.locator('#navView [data-view="changes"]'), 1000);
-await click(ui.locator(".change").first(), 1000);
-await click(ui.locator("#versions button").first(), 1300);
-await click(ui.locator(".ev-version"), 1300);
-await click(ui.locator(".thread.pending .btn.primary"), 2600);
+await click(ui.locator(".change").first(), 2600, { dx: 0.5, dy: 0.25 });
+await click(ui.locator(".change .change-ok"), 2600);
 
 await cdp.send("Page.stopScreencast");
 await sleep(300);

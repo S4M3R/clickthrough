@@ -114,8 +114,15 @@ The flow is a directed graph. The left nav renders it as a branch tree:
 - Each screen row shows an open-comment count badge.
 
 The sidebar switches between this tree ("Screens") and "Changes": the comments
-the agent finished, the ones still to check first, then the checked ones. A
-click opens the screen version named in the agent's evidence. The comments
+the agent finished, the ones still to check first, then the checked ones. Each
+is a card with its state, the agent's reply, the component and the versions
+(`v1 → v2`), and a "Looks good" button while it waits. Opening one shows the
+screen before and after, side by side: "before" is the version the comment was
+left on (with the commented component outlined), "after" is the version in the
+agent's evidence. Without version evidence, or when both are the same version,
+the single screen is shown. Accepting a change opens the next one that waits.
+Keys in this view: `↑`/`↓` (or `K`/`J`) pick a change, `Y` or `Enter` accepts
+it, `R` focuses the reply, `Esc` goes back to the single screen. The comments
 panel's "Open" filter lists open threads and finished ones not checked yet.
 - Selecting a screen remembers the branch path in the URL hash `#<screen-id>`.
 

@@ -217,51 +217,163 @@ function renderNav() {
   $("changesCount").hidden = n === 0;
   $("changesCount").textContent = String(n);
   $("changesCount").setAttribute("aria-label", `${n} to check`);
+  $("footTree").hidden = view !== "tree";
+  $("footChanges").hidden = view !== "changes";
   if (view === "changes") renderChanges();
+}
+
+// Finished comments in the order the list shows them: to check first, newest first.
+function changeList() {
+  const done = state.comments
+    .filter((c) => c.status === "resolved" && c.resolvedBy === "agent")
+    .sort((a, b) => String(b.resolvedAt).localeCompare(String(a.resolvedAt)));
+  return [...done.filter(needsCheck), ...done.filter((c) => !needsCheck(c))].map((c) => {
+    const last = [...c.replies].reverse().find((r) => r.author === "agent");
+    return { c, last, shown: last?.evidence?.find((e) => e.type === "version") };
+  });
+}
+
+function ago(iso) {
+  const s = Math.max(0, (Date.now() - new Date(iso).getTime()) / 1000);
+  if (!Number.isFinite(s)) return "";
+  if (s < 60) return "now";
+  if (s < 3600) return `${Math.floor(s / 60)}m`;
+  if (s < 86400) return `${Math.floor(s / 3600)}h`;
+  return `${Math.floor(s / 86400)}d`;
+}
+
+function strokeIcon(paths, dashed) {
+  const ns = "http://www.w3.org/2000/svg";
+  const svg = document.createElementNS(ns, "svg");
+  svg.setAttribute("viewBox", "0 0 16 16");
+  svg.setAttribute("class", "ico");
+  svg.setAttribute("aria-hidden", "true");
+  const c = document.createElementNS(ns, "circle");
+  c.setAttribute("cx", "8"); c.setAttribute("cy", "8"); c.setAttribute("r", "6");
+  if (dashed) c.setAttribute("stroke-dasharray", "2.4 2.2");
+  svg.appendChild(c);
+  for (const d of paths) {
+    const p = document.createElementNS(ns, "path");
+    p.setAttribute("d", d);
+    svg.appendChild(p);
+  }
+  return svg;
 }
 
 function renderChanges() {
   const box = $("changes");
   box.textContent = "";
-  const done = state.comments
-    .filter((c) => c.status === "resolved" && c.resolvedBy === "agent")
-    .sort((a, b) => String(b.resolvedAt).localeCompare(String(a.resolvedAt)));
-  const groups = [["To check", done.filter(needsCheck)], ["Checked", done.filter((c) => !needsCheck(c))]];
-  if (!done.length) {
+  const list = changeList();
+  if (!list.length) {
     box.appendChild(el("p", "none", "Nothing yet. When the agent finishes a comment, it shows up here for you to check."));
     return;
   }
-  for (const [label, list] of groups) {
-    if (!list.length) continue;
-    box.appendChild(el("div", "group-label", `${label} (${list.length})`));
-    for (const c of list) {
-      const last = [...c.replies].reverse().find((r) => r.author === "agent");
-      const shown = last?.evidence?.find((e) => e.type === "version");
-      const b = el("button", "change" + (needsCheck(c) ? " pending" : ""));
-      b.type = "button";
-      b.setAttribute("aria-current", String(state.lit === c.id));
-      const head = el("span", "change-head");
-      head.append(el("span", "t", screens()[c.screen]?.title || c.screen));
-      if (shown) head.append(el("span", "v", `v${shown.v}`));
-      b.append(head, el("span", "change-target", targetLabel(c.target)), el("span", "change-text", last?.text || c.text));
-      b.onclick = () => openChange(c, shown);
-      box.appendChild(b);
+  let group = null;
+  for (const { c, last, shown } of list) {
+    const pending = needsCheck(c);
+    if (group !== pending) {
+      group = pending;
+      const n = list.filter((x) => needsCheck(x.c) === pending).length;
+      box.appendChild(el("div", "group-label", `${pending ? "To check" : "Checked"} (${n})`));
     }
+    const card = el("div", "change" + (pending ? " pending" : ""));
+    card.setAttribute("role", "button");
+    card.tabIndex = 0;
+    card.dataset.id = c.id;
+    card.setAttribute("aria-current", String(state.lit === c.id));
+
+    const top = el("div", "change-top");
+    const chip = el("span", "chip " + (pending ? "check" : "ok"));
+    chip.append(strokeIcon(pending ? [] : ["M5.5 8.2l1.8 1.8 3.2-3.6"], pending), pending ? "To check" : "Checked");
+    top.append(el("span", "change-screen", screens()[c.screen]?.title || c.screen), chip);
+    if (c.resolvedAt) top.append(el("span", "change-time", ago(c.resolvedAt)));
+
+    const meta = el("div", "change-meta");
+    meta.append(el("span", "change-target", targetLabel(c.target)));
+    if (shown) meta.append(el("span", "v", c.version != null && c.version !== shown.v ? `v${c.version} → v${shown.v}` : `v${shown.v}`));
+
+    card.append(top, el("div", "change-title", last?.text || c.text), meta);
+    if (pending) {
+      const ok = el("button", "btn primary change-ok", "Looks good");
+      ok.type = "button";
+      ok.title = "Accept this change (Y)";
+      ok.onclick = (e) => { e.stopPropagation(); confirmChange(c); };
+      card.appendChild(ok);
+    }
+    card.onclick = () => openChange(c, shown);
+    card.addEventListener("keydown", (e) => {
+      // Enter or Space opens a card; on the open one, Enter is left to the page (it accepts).
+      if (e.target !== card || (e.key !== "Enter" && e.key !== " ") || (e.key === "Enter" && state.lit === c.id)) return;
+      e.preventDefault();
+      e.stopPropagation();
+      openChange(c, shown);
+    });
+    box.appendChild(card);
   }
+  box.querySelector('.change[aria-current="true"]')?.scrollIntoView({ block: "nearest" });
 }
 
+// Open a finished comment: its thread, and the screen before and after the change.
 function openChange(c, shown) {
   const screen = shown && screens()[shown.screen] ? shown.screen : c.screen;
   if (shown) state.versionPick[screen] = shown.v;
   if (!needsCheck(c)) setFilter("all"); // checked threads are not in the Open list
   if (screen !== state.screenId) selectScreen(screen);
   state.lit = c.id;
+  state.compare = shown && c.version != null && (c.screen !== screen || c.version !== shown.v) ? { id: c.id } : null;
   renderAll();
   document.querySelector(`.thread[data-id="${CSS.escape(c.id)}"]`)?.scrollIntoView({ block: "nearest" });
 }
 
+// The two versions to put side by side for the open change, or null.
+function comparison() {
+  if (!state.compare) return null;
+  const item = changeList().find((x) => x.c.id === state.compare.id);
+  if (!item?.shown) return null;
+  const { c, shown } = item;
+  const before = screens()[c.screen]?.versions?.find((x) => x.v === c.version);
+  const after = screens()[shown.screen]?.versions?.find((x) => x.v === shown.v);
+  if (!before || !after || shown.screen !== state.screenId) return null;
+  return { c, before, after, beforeScreen: c.screen, afterScreen: shown.screen };
+}
+
+function renderCompare(box, cmp) {
+  box.textContent = "";
+  const side = (label, screenId, ver, target) => {
+    const fig = el("figure", "cmp");
+    const cap = el("figcaption");
+    cap.append(el("span", "cmp-label", label), el("span", "cmp-ver", `v${ver.v}`));
+    if (screenId !== state.screenId) cap.append(el("span", "cmp-note", screens()[screenId]?.title || screenId));
+    else if (ver.note) cap.append(el("span", "cmp-note", ver.note));
+    const fr = el("div", "cmp-frame");
+    const img = new Image();
+    img.src = fileUrl(ver.image);
+    img.alt = `${label}: ${screens()[screenId]?.title || screenId}, version ${ver.v}`;
+    img.width = ver.W;
+    img.height = ver.H;
+    fr.appendChild(img);
+    if (target) {
+      // Where the comment was left.
+      const t = el("div", "cmp-target");
+      t.style.left = `${(target.x / ver.W) * 100}%`;
+      t.style.top = `${(target.y / ver.H) * 100}%`;
+      t.style.width = `${(target.w / ver.W) * 100}%`;
+      t.style.height = `${(target.h / ver.H) * 100}%`;
+      fr.appendChild(t);
+    }
+    fig.append(cap, fr);
+    return fig;
+  };
+  const close = el("button", "btn cmp-close", "Single view");
+  close.type = "button";
+  close.title = "Show only the new version (Esc)";
+  close.onclick = () => { state.compare = null; renderStage(); };
+  box.append(side("Before", cmp.beforeScreen, cmp.before, cmp.c.target), side("After", cmp.afterScreen, cmp.after, null), close);
+}
+
 function setNavView(view) {
   state.navView = view === "changes" ? "changes" : "tree";
+  if (state.navView === "tree" && state.compare) { state.compare = null; renderStage(); }
   store.set("fr-nav", state.navView);
   renderNav();
 }
@@ -285,6 +397,7 @@ function renderStage() {
   const frame = $("frame");
   const empty = $("empty");
   frame.textContent = "";
+  $("compare").hidden = true;
   hideTip();
 
   const id = state.screenId;
@@ -301,17 +414,18 @@ function renderStage() {
   const seg = $("versions");
   seg.textContent = "";
   const v = currentVersion(scr, id);
+  const cmp = comparison();
   seg.hidden = !scr || (scr.versions?.length ?? 0) < 2;
   for (const ver of scr?.versions ?? []) {
     const b = el("button", null, `v${ver.v}`);
     b.type = "button";
-    b.setAttribute("aria-pressed", String(ver.v === v?.v));
+    b.setAttribute("aria-pressed", String(!cmp && ver.v === v?.v));
     b.title = ver.note || `Version ${ver.v}`;
-    b.onclick = () => { state.versionPick[id] = ver.v; renderStage(); };
+    b.onclick = () => { state.versionPick[id] = ver.v; state.compare = null; renderStage(); };
     seg.appendChild(b);
   }
   const note = $("versionNote");
-  note.hidden = !v?.note;
+  note.hidden = !v?.note || Boolean(cmp);
   note.textContent = v?.note ? `v${v.v}${v.v === latestV(scr) ? " (latest)" : ""}: ${v.note}` : "";
 
   if (!state.flow) {
@@ -330,8 +444,14 @@ function renderStage() {
     empty.append(el("pre", null, `clickthrough screen ${flowName ?? proj} ${id || "<screen>"} --image shot.png --boxes boxes.json${flowName ? ` --project ${proj}` : ""}`));
     return;
   }
-  frame.hidden = false;
   empty.hidden = true;
+  if (cmp) {
+    frame.hidden = true;
+    $("compare").hidden = false;
+    renderCompare($("compare"), cmp);
+    return;
+  }
+  frame.hidden = false;
   frame.classList.toggle("show", $("outline").checked);
 
   const img = new Image();
@@ -713,7 +833,12 @@ async function confirmChange(c) {
   try {
     const updated = await api(`/api/flows/${encodeURIComponent(state.flowId)}/comments/${encodeURIComponent(c.id)}/confirm`, { method: "POST", body: {} });
     upsertComment(updated);
+    // Straight on to the next one waiting, so a batch reads like a queue.
+    const next = changeList().find((x) => needsCheck(x.c));
+    if (next) return openChange(next.c, next.shown);
+    if (state.compare?.id === c.id) state.compare = null;
     renderAll();
+    toast("All checked.");
   } catch (e) { toast(e.message); }
 }
 
@@ -768,7 +893,11 @@ function go(url) {
 
 // ---------- Navigation ----------
 function selectScreen(id, { replace = false } = {}) {
-  if (id === state.screenId) return;
+  if (id === state.screenId) {
+    if (state.compare) { state.compare = null; renderAll(); }
+    return;
+  }
+  state.compare = null;
   state.screenId = id;
   state.lit = null;
   if (state.draft && state.draft.screen !== id) closePopover();
@@ -994,9 +1123,33 @@ $("togglePanel").onclick = () => {
 document.addEventListener("keydown", (e) => {
   if (e.target.closest("input, textarea, select")) return;
   if (!e.metaKey && !e.ctrlKey && !e.altKey && (e.key === "n" || e.key === "c")) setMode(e.key === "n" ? "navigate" : "comment");
+  if (state.navView === "changes" && !$("app").hidden && !e.metaKey && !e.ctrlKey && !e.altKey) {
+    // Changes: up and down pick a change, Y or Enter accepts it, R replies.
+    const list = changeList();
+    const i = list.findIndex((x) => x.c.id === state.lit);
+    const move = e.key === "ArrowDown" || e.key === "j" ? 1 : e.key === "ArrowUp" || e.key === "k" ? -1 : 0;
+    if (move && list.length) {
+      e.preventDefault();
+      const to = list[i < 0 ? 0 : Math.min(Math.max(i + move, 0), list.length - 1)];
+      return openChange(to.c, to.shown);
+    }
+    const cur = list[i];
+    if (cur && (e.key === "y" || (e.key === "Enter" && !e.target.closest("button, a")))) {
+      e.preventDefault();
+      if (needsCheck(cur.c)) confirmChange(cur.c);
+      return;
+    }
+    if (cur && e.key === "r") {
+      e.preventDefault();
+      return document.querySelector(`.thread[data-id="${CSS.escape(cur.c.id)}"] input`)?.focus();
+    }
+  }
   if (e.key === "ArrowRight") step(1);
   if (e.key === "ArrowLeft") step(-1);
-  if (e.key === "Escape") closePopover();
+  if (e.key === "Escape") {
+    closePopover();
+    if (state.compare) { state.compare = null; renderStage(); }
+  }
 });
 document.addEventListener("mousedown", (e) => {
   const pop = $("popover");

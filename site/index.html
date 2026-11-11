@@ -185,7 +185,7 @@
     <div>
       <h2 data-c="Heading">Done, with evidence</h2>
       <p>When the agent finishes a comment it does not just say so. The thread shows what the agent attached: the screen version that shows the change (one click to view), screenshots, a link to the PR or the deploy, and the checks it ran.</p>
-      <p>You have the last word. Finished comments collect under Changes, marked “To check”. Click “Looks good” to close one. Not right yet? Reply: the thread reopens and your reply reaches the agent like a new comment.</p>
+      <p>You have the last word. Finished comments collect under Changes, marked “To check”. Open one and the screen shows before and after, side by side. Press <kbd>Y</kbd> for “Looks good” and you are on the next one. Not right yet? Reply: the thread reopens and your reply reaches the agent like a new comment.</p>
       <pre data-c="Code"><code><span class="p">$</span> clickthrough done onboarding c_1a2b3c \
     "Swapped the buttons: GitHub is first." \
     --version signup --image after.png \
@@ -194,6 +194,7 @@
     --check "npm test: 49 passed"</code></pre>
     </div>
     <figure class="shot narrow"><img src="media/evidence.webp" width="598" height="844" loading="lazy" alt="A comment thread on the GitHub button marked To check. The agent's reply lists its evidence: a button to view version 2 of the screen, a screenshot, a link to PR 12 and a passing test run. Under it, a Looks good button."></figure>
+    <figure class="shot pan span"><img src="media/compare.webp" width="2560" height="940" loading="lazy" alt="The Changes list with one change open: the signup screen before, with Google first and the commented button outlined, and after, with GitHub first. The change's card has a Looks good button."></figure>
   </section>
 
   <section id="more">

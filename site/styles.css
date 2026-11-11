@@ -133,6 +133,7 @@ pre { margin: 18px 0 0; background: var(--code-bg); color: var(--code-fg); borde
 /* ---------- two-column sections ---------- */
 .split { display: grid; gap: 28px; }
 .split > * { min-width: 0; }
+.split .span { grid-column: 1 / -1; }
 
 /* ---------- modes ---------- */
 .modes { margin-top: 20px; }

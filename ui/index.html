@@ -41,7 +41,8 @@
     </div>
     <nav id="tree" class="tree-wrap" aria-label="Screens"></nav>
     <section id="changes" class="tree-wrap changes" aria-label="Changes" hidden></section>
-    <div class="nav-foot"><kbd>C</kbd> comment, <kbd>N</kbd> navigate: click through the screens like the real app. <kbd>&larr;</kbd> <kbd>&rarr;</kbd> move along the flow.</div>
+    <div class="nav-foot" id="footChanges" hidden><kbd>&uarr;</kbd> <kbd>&darr;</kbd> pick a change, <kbd>Y</kbd> looks good, <kbd>R</kbd> reply, <kbd>Esc</kbd> single view.</div>
+    <div class="nav-foot" id="footTree"><kbd>C</kbd> comment, <kbd>N</kbd> navigate: click through the screens like the real app. <kbd>&larr;</kbd> <kbd>&rarr;</kbd> move along the flow.</div>
   </aside>
 
   <main class="main">
@@ -68,6 +69,7 @@
     <div class="note" id="versionNote" hidden></div>
     <div class="stage" id="stage">
       <div class="frame" id="frame"></div>
+      <div class="compare" id="compare" hidden></div>
       <div class="empty" id="empty" hidden></div>
     </div>
   </main>

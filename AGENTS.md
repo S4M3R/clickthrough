@@ -125,7 +125,9 @@ For each comment:
 
    `done` adds your reply with the evidence and hands the thread to the person:
    they see it under Changes as "To check" and either accept it or reply. You
-   do not wait for that; carry on with the next comment. Only list checks you
+   do not wait for that; carry on with the next comment. Always pass
+   `--version`: it is what lets them see the screen before and after your
+   change, side by side. Only list checks you
    ran and links that exist. Use `reply` (no evidence, thread
    stays open) for questions and progress notes, and `resolve` only for threads
    that need no change.
