@@ -21,9 +21,12 @@ record, the repository settings below, and the post.
 
 ### 2. npm
 
-- [x] `clickthrough@0.1.0` is published (`npm view clickthrough version` prints `0.1.0`).
+- [x] `clickthrough@0.1.0` is published.
+- [ ] `clickthrough@0.2.0`: confirm `npm view clickthrough version` prints `0.2.0`.
+      Publishing needs your passkey twice in the browser (sign in, then confirm).
 - [x] Install lines everywhere use `npm install -g clickthrough` and `npx clickthrough`.
-- [ ] For the next release: bump `version`, `npm test`, `npm pack --dry-run`, `npm publish`.
+- [ ] For the next release: bump `version`, add a `CHANGELOG.md` entry,
+      `npm test`, `npm pack --dry-run`, `npm publish`, then a GitHub release.
 
 ### 3. Repository
 
@@ -54,7 +57,7 @@ record, the repository settings below, and the post.
 - [ ] Open the production URL on a phone and on a laptop. Play the video.
 - [ ] Paste the URL into the X composer (do not post) and check the card
       shows `og.png` with the headline.
-- [ ] Watch `site/media/demo.mp4` once more. It is 39 seconds, 1632x1200, H.264, no audio.
+- [ ] Watch `site/media/demo.mp4` once more. It is 42 seconds, 1632x1200, H.264, no audio.
 
 ## The post
 

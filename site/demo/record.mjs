@@ -124,6 +124,8 @@ await sleep(500);
 await click(ui.locator("#popSubmit"), 300);
 const { comment } = await gotComment;
 await sleep(600);
+// The comment is now with the agent: Changes lists it as in progress
+await click(ui.locator('#navView [data-view="changes"]'), 1400);
 
 // 4. The agent answers: new version of the screen, then Done with evidence
 await new Promise((resolve, reject) => {
@@ -132,14 +134,14 @@ await new Promise((resolve, reject) => {
   agent.stderr.pipe(process.stderr);
   agent.on("exit", (code) => (code ? reject(new Error(`agent.sh exited ${code}`)) : resolve()));
 });
-await ui.locator(".status-check").waitFor();
+await ui.locator(".change.check").waitFor();
 await sleep(2000);
 
-// 5. The finished comment is waiting under Changes: open it to see the screen
-//    before and after, then accept it from the list
-await click(ui.locator('#navView [data-view="changes"]'), 1000);
-await click(ui.locator(".change").first(), 2600, { dx: 0.5, dy: 0.25 });
-await click(ui.locator(".change .change-ok"), 2600); // shown in place of the state while the pointer is on the card
+// 5. The card moved to "To check": open it to see the screen before and after,
+//    accept it under the comparison, then open the Checked list
+await click(ui.locator(".change.check").first(), 2800, { dx: 0.4, dy: 0.6 });
+await click(ui.locator(".cmp-foot .btn.primary"), 1800);
+await click(ui.locator(".checked-row"), 2400);
 
 await cdp.send("Page.stopScreencast");
 await sleep(300);

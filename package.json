@@ -1,6 +1,6 @@
 {
   "name": "clickthrough",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Review a product flow screen by screen: click any component, leave a comment, and let your coding agent make the change.",
   "type": "module",
   "bin": { "clickthrough": "bin/cli.mjs", "flow-reviews": "bin/cli.mjs" },
