@@ -89,7 +89,7 @@
         aria-label="Demo: a reviewer clicks through a signup flow, comments on the GitHub button, and the agent replies with a new version and evidence.">
         <source src="media/demo.mp4" type="video/mp4">
       </video>
-      <figcaption>Under 40 seconds, no sound. The product on screen is made up. The agent's side is a script you can run yourself: <a href="https://github.com/S4M3R/clickthrough/tree/main/site/demo">site/demo/agent.sh</a>.</figcaption>
+      <figcaption>About 40 seconds, no sound. The product on screen is made up. The agent's side is a script you can run yourself: <a href="https://github.com/S4M3R/clickthrough/tree/main/site/demo">site/demo/agent.sh</a>.</figcaption>
     </figure>
   </section>
 
@@ -110,7 +110,7 @@
       </li>
       <li>
         <h3>You get the change and the proof</h3>
-        <p>The screen you are looking at switches to the new version. The thread turns Done, with the version, screenshots, links and the checks the agent ran.</p>
+        <p>The screen you are looking at switches to the new version. The comment lands under Changes with the version, screenshots, links and the checks the agent ran, and waits for your OK.</p>
       </li>
     </ol>
   </section>
@@ -184,8 +184,8 @@
   <section id="done" class="split">
     <div>
       <h2 data-c="Heading">Done, with evidence</h2>
-      <p>When the agent finishes a comment it does not just say so. The thread gets a Done badge and what the agent attached: the screen version that shows the change (one click to view), screenshots, a link to the PR or the deploy, and the checks it ran.</p>
-      <p>Not right yet? Reply. The thread reopens and your reply reaches the agent like a new comment.</p>
+      <p>When the agent finishes a comment it does not just say so. The thread shows what the agent attached: the screen version that shows the change (one click to view), screenshots, a link to the PR or the deploy, and the checks it ran.</p>
+      <p>You have the last word. Finished comments collect under Changes, marked “To check”. Click “Looks good” to close one. Not right yet? Reply: the thread reopens and your reply reaches the agent like a new comment.</p>
       <pre data-c="Code"><code><span class="p">$</span> clickthrough done onboarding c_1a2b3c \
     "Swapped the buttons: GitHub is first." \
     --version signup --image after.png \
@@ -193,7 +193,7 @@
     --label "PR #12" \
     --check "npm test: 49 passed"</code></pre>
     </div>
-    <figure class="shot narrow"><img src="media/evidence.webp" width="598" height="844" loading="lazy" alt="A comment thread on the GitHub button marked Done. The agent's reply lists its evidence: a button to view version 2 of the screen, a screenshot, a link to PR 12 and a passing test run."></figure>
+    <figure class="shot narrow"><img src="media/evidence.webp" width="598" height="844" loading="lazy" alt="A comment thread on the GitHub button marked To check. The agent's reply lists its evidence: a button to view version 2 of the screen, a screenshot, a link to PR 12 and a passing test run. Under it, a Looks good button."></figure>
   </section>
 
   <section id="more">

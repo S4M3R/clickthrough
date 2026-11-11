@@ -34,8 +34,13 @@
         <select id="flowPicker"></select>
       </label>
       <p class="flow-title" id="flowTitle"></p>
+      <div class="seg wide" id="navView" role="group" aria-label="Sidebar view">
+        <button type="button" data-view="tree" title="The flow's screens and branches">Screens</button>
+        <button type="button" data-view="changes" title="What the agent finished, for you to check">Changes<span class="count" id="changesCount" hidden></span></button>
+      </div>
     </div>
     <nav id="tree" class="tree-wrap" aria-label="Screens"></nav>
+    <section id="changes" class="tree-wrap changes" aria-label="Changes" hidden></section>
     <div class="nav-foot"><kbd>C</kbd> comment, <kbd>N</kbd> navigate: click through the screens like the real app. <kbd>&larr;</kbd> <kbd>&rarr;</kbd> move along the flow.</div>
   </aside>
 

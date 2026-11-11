@@ -29,9 +29,11 @@ The recording uses a made-up product; the scripts that produce it are in
 - **Comment on the component, not the screenshot.** Every component is a click
   target, so a comment says "Button: Continue with GitHub", not "somewhere top
   left". Paste, drop or attach images to show what you mean.
-- **Done, with evidence.** When the agent finishes a comment it marks it Done
-  and shows its proof: the screen version with the change (one click to view),
-  screenshots, links to the PR or deploy, and the checks it ran.
+- **Done, with evidence, and you have the last word.** When the agent finishes
+  a comment it shows its proof: the screen version with the change (one click
+  to view), screenshots, links to the PR or deploy, and the checks it ran. The
+  comment waits under **Changes** as "To check" until you click "Looks good",
+  or reply to send it back.
 - **Versions per screen.** Each re-capture is a new version with a note on what
   changed; switch between them in the toolbar.
 - **All your projects in one place.** Every project you review is registered

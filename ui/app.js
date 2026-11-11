@@ -80,6 +80,8 @@ function currentVersion(scr, id) {
   const pick = state.versionPick[id];
   return scr.versions.find((v) => v.v === pick) ?? scr.versions[scr.versions.length - 1];
 }
+// Finished by the agent and not yet checked by the reviewer (same rule as the store).
+const needsCheck = (c) => c.status === "resolved" && c.resolvedBy === "agent" && !c.confirmedAt;
 const targetLabel = (t) => (t ? `${t.k}: ${t.l || "(no text)"}` : "Whole screen");
 
 /**
@@ -201,6 +203,72 @@ function renderTree() {
     ul.className = "tree";
     wrap.appendChild(ul);
   }
+}
+
+// ---------- Rendering: changes ----------
+// What the agent finished: first the ones waiting for the reviewer's check,
+// then the ones already checked. A click opens the screen version that shows it.
+function renderNav() {
+  const view = state.navView === "changes" ? "changes" : "tree";
+  $("tree").hidden = view !== "tree";
+  $("changes").hidden = view !== "changes";
+  document.querySelectorAll("#navView [data-view]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.view === view)));
+  const n = state.comments.filter(needsCheck).length;
+  $("changesCount").hidden = n === 0;
+  $("changesCount").textContent = String(n);
+  $("changesCount").setAttribute("aria-label", `${n} to check`);
+  if (view === "changes") renderChanges();
+}
+
+function renderChanges() {
+  const box = $("changes");
+  box.textContent = "";
+  const done = state.comments
+    .filter((c) => c.status === "resolved" && c.resolvedBy === "agent")
+    .sort((a, b) => String(b.resolvedAt).localeCompare(String(a.resolvedAt)));
+  const groups = [["To check", done.filter(needsCheck)], ["Checked", done.filter((c) => !needsCheck(c))]];
+  if (!done.length) {
+    box.appendChild(el("p", "none", "Nothing yet. When the agent finishes a comment, it shows up here for you to check."));
+    return;
+  }
+  for (const [label, list] of groups) {
+    if (!list.length) continue;
+    box.appendChild(el("div", "group-label", `${label} (${list.length})`));
+    for (const c of list) {
+      const last = [...c.replies].reverse().find((r) => r.author === "agent");
+      const shown = last?.evidence?.find((e) => e.type === "version");
+      const b = el("button", "change" + (needsCheck(c) ? " pending" : ""));
+      b.type = "button";
+      b.setAttribute("aria-current", String(state.lit === c.id));
+      const head = el("span", "change-head");
+      head.append(el("span", "t", screens()[c.screen]?.title || c.screen));
+      if (shown) head.append(el("span", "v", `v${shown.v}`));
+      b.append(head, el("span", "change-target", targetLabel(c.target)), el("span", "change-text", last?.text || c.text));
+      b.onclick = () => openChange(c, shown);
+      box.appendChild(b);
+    }
+  }
+}
+
+function openChange(c, shown) {
+  const screen = shown && screens()[shown.screen] ? shown.screen : c.screen;
+  if (shown) state.versionPick[screen] = shown.v;
+  if (!needsCheck(c)) setFilter("all"); // checked threads are not in the Open list
+  if (screen !== state.screenId) selectScreen(screen);
+  state.lit = c.id;
+  renderAll();
+  document.querySelector(`.thread[data-id="${CSS.escape(c.id)}"]`)?.scrollIntoView({ block: "nearest" });
+}
+
+function setNavView(view) {
+  state.navView = view === "changes" ? "changes" : "tree";
+  store.set("fr-nav", state.navView);
+  renderNav();
+}
+
+function setFilter(filter) {
+  state.filter = filter === "all" ? "all" : "open";
+  document.querySelectorAll("[data-filter]").forEach((x) => x.setAttribute("aria-pressed", String(x.dataset.filter === state.filter)));
 }
 
 function countOpenIn(nodes) {
@@ -503,7 +571,8 @@ function renderThreads() {
   const scrollTop = box.scrollTop;
   box.textContent = "";
   const all = screenComments(state.screenId);
-  const list = state.filter === "open" ? all.filter((c) => c.status !== "resolved") : all;
+  // "Open" keeps what still needs the reviewer: open threads and finished ones not checked yet.
+  const list = state.filter === "open" ? all.filter((c) => c.status !== "resolved" || needsCheck(c)) : all;
   if (!list.length) {
     box.appendChild(el("p", "none", all.length ? "No open comments on this screen." : "No comments yet. Click a component on the screen to add one."));
     return;
@@ -513,7 +582,9 @@ function renderThreads() {
     const num = all.indexOf(c) + 1;
     const card = el("article", "thread");
     card.dataset.id = c.id;
-    if (c.status === "resolved") card.classList.add("resolved");
+    const pending = needsCheck(c);
+    if (c.status === "resolved" && !pending) card.classList.add("resolved");
+    if (pending) card.classList.add("pending");
     if (state.lit === c.id) card.classList.add("lit");
 
     const head = el("div", "th-head");
@@ -523,7 +594,8 @@ function renderThreads() {
       if (v && c.version !== v.v) vv.title = "Left on another version";
       head.appendChild(vv);
     }
-    if (c.status === "resolved") head.appendChild(el("span", "status-ok", c.resolvedBy === "agent" ? "Done" : "Resolved"));
+    if (pending) head.appendChild(el("span", "status-check", "To check"));
+    else if (c.status === "resolved") head.appendChild(el("span", "status-ok", c.resolvedBy === "agent" ? "Done" : "Resolved"));
     card.appendChild(head);
 
     card.appendChild(message(c.author, c.text));
@@ -541,13 +613,17 @@ function renderThreads() {
     const actions = el("div", "th-actions");
     const input = el("input");
     input.type = "text";
-    input.placeholder = "Reply";
+    input.placeholder = pending ? "Not right? Say what to change" : "Reply";
     input.setAttribute("aria-label", `Reply to comment ${num}`);
     input.addEventListener("click", (e) => e.stopPropagation());
     input.addEventListener("keydown", (e) => { if (e.key === "Enter") sendReply(c, input); });
-    const toggle = el("button", "btn", c.status === "resolved" ? "Reopen" : "Resolve");
+    const toggle = el("button", pending ? "btn primary" : "btn", pending ? "Looks good" : c.status === "resolved" ? "Reopen" : "Resolve");
     toggle.type = "button";
-    toggle.onclick = (e) => { e.stopPropagation(); setStatus(c, c.status === "resolved" ? "open" : "resolved"); };
+    toggle.onclick = (e) => {
+      e.stopPropagation();
+      if (pending) confirmChange(c);
+      else setStatus(c, c.status === "resolved" ? "open" : "resolved");
+    };
     actions.append(input, toggle);
     card.appendChild(actions);
 
@@ -632,6 +708,15 @@ async function setStatus(c, status) {
   } catch (e) { toast(e.message); }
 }
 
+// The reviewer checked what the agent did and accepts it.
+async function confirmChange(c) {
+  try {
+    const updated = await api(`/api/flows/${encodeURIComponent(state.flowId)}/comments/${encodeURIComponent(c.id)}/confirm`, { method: "POST", body: {} });
+    upsertComment(updated);
+    renderAll();
+  } catch (e) { toast(e.message); }
+}
+
 function upsertComment(c) {
   const i = state.comments.findIndex((x) => x.id === c.id);
   if (i >= 0) state.comments[i] = c; else state.comments.push(c);
@@ -650,7 +735,10 @@ function lightComment(id, scrollPanel) {
 }
 function applyLit() {
   const c = state.comments.find((x) => x.id === state.lit);
-  const key = c?.target ? itemKey(c.target) : null;
+  // The box is where the component was on the version the comment was left on;
+  // on another version that spot may hold a different component.
+  const shown = currentVersion(screens()[state.screenId], state.screenId);
+  const key = c?.target && c.version === shown?.v ? itemKey(c.target) : null;
   document.querySelectorAll(".hs").forEach((h) => h.classList.toggle("lit", key != null && h.dataset.key === key));
 }
 
@@ -699,6 +787,7 @@ function step(delta) {
 
 function renderAll() {
   renderTree();
+  renderNav();
   renderStage();
   renderThreads();
 }
@@ -737,7 +826,9 @@ async function loadFlow(id, { keepScreen = true } = {}) {
   const switching = state.flowId !== id;
   state.flowId = id;
   state.flow = data.flow;
+  const waiting = new Set(state.comments.filter(needsCheck).map((c) => c.id));
   state.comments = data.comments ?? [];
+  const finished = switching ? [] : state.comments.filter((c) => needsCheck(c) && !waiting.has(c.id));
   if (switching) { state.versionPick = {}; state.lit = null; closePopover(); }
   $("flowPicker").value = id;
   $("flowTitle").textContent = data.flow.title || id;
@@ -766,6 +857,8 @@ async function loadFlow(id, { keepScreen = true } = {}) {
   }
   renderAll();
   if (!switching) $("stage").scrollTop = stageScroll;
+  // The agent finished something while this page was open: say so.
+  if (finished.length) toast(finished.length === 1 ? "The agent finished a comment. Check it under Changes." : `The agent finished ${finished.length} comments. Check them under Changes.`);
 
   // Keep an open popover's draft across the live re-render.
   if (state.draft && !$("popover").hidden) {
@@ -831,6 +924,7 @@ async function showHome() {
         a.dataset.link = "";
         const meta = el("span", "meta", `${f.screens} screens`);
         if (f.open) meta.append(" · ", el("span", "open", `${f.open} open`));
+        if (f.review) meta.append(" · ", el("span", "check", `${f.review} to check`));
         a.append(el("span", null, f.title || f.flow), meta);
         const li = el("li");
         li.appendChild(a);
@@ -864,6 +958,8 @@ $("commentScreen").onclick = () => openPopover(null, $("commentScreen"));
 document.querySelectorAll("#mode [data-mode]").forEach((b) => { b.onclick = () => setMode(b.dataset.mode); });
 state.mode = store.get("fr-mode") === "navigate" ? "navigate" : "comment";
 document.querySelectorAll("#mode [data-mode]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.mode === state.mode)));
+document.querySelectorAll("#navView [data-view]").forEach((b) => { b.onclick = () => setNavView(b.dataset.view); });
+state.navView = store.get("fr-nav") === "changes" ? "changes" : "tree";
 $("popCancel").onclick = closePopover;
 $("popSubmit").onclick = submitPopover;
 $("popFile").addEventListener("change", (e) => { attachFiles([...e.target.files]); e.target.value = ""; });
@@ -885,11 +981,7 @@ $("popText").addEventListener("keydown", (e) => {
 });
 $("flowPicker").onchange = (e) => go(routeFor(e.target.value));
 document.querySelectorAll("[data-filter]").forEach((b) => {
-  b.onclick = () => {
-    state.filter = b.dataset.filter;
-    document.querySelectorAll("[data-filter]").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
-    renderThreads();
-  };
+  b.onclick = () => { setFilter(b.dataset.filter); renderThreads(); };
 });
 const panelOpen = store.get("fr-panel") !== "0";
 $("app").classList.toggle("no-panel", !panelOpen);

@@ -123,12 +123,15 @@ For each comment:
      --check "pnpm test: 49 passed"   # checks you actually ran (repeatable)
    ```
 
-   `done` adds your reply with the evidence and marks the thread Done. Only
-   list checks you ran and links that exist. Use `reply` (no evidence, thread
+   `done` adds your reply with the evidence and hands the thread to the person:
+   they see it under Changes as "To check" and either accept it or reply. You
+   do not wait for that; carry on with the next comment. Only list checks you
+   ran and links that exist. Use `reply` (no evidence, thread
    stays open) for questions and progress notes, and `resolve` only for threads
    that need no change.
 4. If the request is ambiguous or asks for options, reply with what you need or
    with the options (capture each option as its own screen or version) and leave
    the thread open.
 
-A reply from the person reopens a resolved thread and shows up in `watch` again.
+A reply from the person reopens a finished thread and shows up in `watch` again:
+they checked your change and it is not right yet.

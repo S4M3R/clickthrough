@@ -123,8 +123,7 @@ await ui.locator("#popText").pressSequentially(COMMENT, { delay: 30 });
 await sleep(500);
 await click(ui.locator("#popSubmit"), 300);
 const { comment } = await gotComment;
-await click(ui.locator('[data-filter="all"]'), 600);
-await click(ui.locator(".thread .msg").first(), 600); // click the thread to drop its highlight
+await sleep(600);
 
 // 4. The agent answers: new version of the screen, then Done with evidence
 await new Promise((resolve, reject) => {
@@ -133,12 +132,16 @@ await new Promise((resolve, reject) => {
   agent.stderr.pipe(process.stderr);
   agent.on("exit", (code) => (code ? reject(new Error(`agent.sh exited ${code}`)) : resolve()));
 });
-await ui.locator(".status-ok").waitFor();
-await sleep(2200);
+await ui.locator(".status-check").waitFor();
+await sleep(2000);
 
-// 5. Compare with the version the comment was left on, then back to the new one
-await click(ui.locator("#versions button").first(), 1400);
-await click(ui.locator(".ev-version"), 2600);
+// 5. The finished comment is waiting under Changes: open it, compare with the
+//    version the comment was left on, then accept it
+await click(ui.locator('#navView [data-view="changes"]'), 1000);
+await click(ui.locator(".change").first(), 1000);
+await click(ui.locator("#versions button").first(), 1300);
+await click(ui.locator(".ev-version"), 1300);
+await click(ui.locator(".thread.pending .btn.primary"), 2600);
 
 await cdp.send("Page.stopScreencast");
 await sleep(300);
