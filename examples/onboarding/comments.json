@@ -1,0 +1,116 @@
+[
+  {
+    "id": "c_342a0fc55b",
+    "screen": "signup",
+    "version": 1,
+    "target": {
+      "k": "Button",
+      "l": "Continue with GitHub",
+      "x": 280,
+      "y": 220,
+      "w": 400,
+      "h": 42
+    },
+    "text": "Put GitHub first. Most of our users are developers.",
+    "author": "reviewer",
+    "status": "resolved",
+    "createdAt": "2026-11-11T01:52:53.189Z",
+    "replies": [
+      {
+        "author": "agent",
+        "text": "Swapped the buttons: GitHub is first.",
+        "at": "2026-11-11T01:52:53.344Z",
+        "evidence": [
+          {
+            "type": "version",
+            "screen": "signup",
+            "v": 2
+          },
+          {
+            "type": "image",
+            "path": "evidence/c_342a0fc55b-274cd0.png"
+          },
+          {
+            "type": "link",
+            "url": "https://example.com/acme/web/pull/12",
+            "label": "PR #12 (sample link)"
+          },
+          {
+            "type": "check",
+            "text": "npm test: 49 passed (sample)"
+          }
+        ]
+      }
+    ],
+    "resolvedAt": "2026-11-11T01:52:53.345Z",
+    "resolvedBy": "agent"
+  },
+  {
+    "id": "c_030db7ac85",
+    "screen": "workspace",
+    "version": 1,
+    "target": null,
+    "text": "Say what a valid workspace URL looks like.",
+    "author": "reviewer",
+    "status": "resolved",
+    "createdAt": "2026-11-11T01:52:53.349Z",
+    "replies": [
+      {
+        "author": "agent",
+        "text": "Added a hint under the URL field.",
+        "at": "2026-11-11T01:52:53.496Z",
+        "evidence": [
+          {
+            "type": "version",
+            "screen": "workspace",
+            "v": 2
+          },
+          {
+            "type": "image",
+            "path": "evidence/c_030db7ac85-158315.png"
+          },
+          {
+            "type": "link",
+            "url": "https://example.com/acme/web/pull/12",
+            "label": "PR #12 (sample link)"
+          },
+          {
+            "type": "check",
+            "text": "npm test: 49 passed (sample)"
+          }
+        ]
+      }
+    ],
+    "resolvedAt": "2026-11-11T01:52:53.497Z",
+    "resolvedBy": "agent",
+    "confirmedAt": "2026-11-11T01:52:53.502Z"
+  },
+  {
+    "id": "c_891a2b7ec8",
+    "screen": "connect",
+    "version": 1,
+    "target": null,
+    "text": "Can we show which sources most teams pick?",
+    "author": "reviewer",
+    "status": "open",
+    "createdAt": "2026-11-11T01:52:53.504Z",
+    "replies": []
+  },
+  {
+    "id": "c_3bc26988ca",
+    "screen": "stripe",
+    "version": 1,
+    "target": null,
+    "text": "Say that we never move money.",
+    "author": "reviewer",
+    "status": "open",
+    "createdAt": "2026-11-11T01:52:53.505Z",
+    "replies": [
+      {
+        "author": "agent",
+        "text": "Under the permissions list, or in the heading?",
+        "at": "2026-11-11T01:52:53.541Z"
+      }
+    ]
+  }
+]

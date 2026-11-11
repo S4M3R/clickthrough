@@ -98,10 +98,12 @@ export const onboarding = {
     workspace: {
       title: "Name your workspace",
       route: "/onboarding/workspace",
-      html: () => page("Step 1 of 3", `<div class="card">
+      // variant "url-hint": the second change the bundled example shows.
+      html: (variant) => page("Step 1 of 3", `<div class="card">
         <h1>Name your workspace</h1><p>This is where your team's dashboards live.</p>
         <label for="w">Workspace name</label><input id="w" placeholder="Northwind Analytics">
-        <label for="u">Workspace URL</label><input id="u" placeholder="acme.example/northwind">
+        <label for="u">Workspace URL</label><input id="u" placeholder="acme.example/northwind"${variant === "url-hint" ? ' style="margin-bottom:6px"' : ""}>
+        ${variant === "url-hint" ? '<p class="small" style="margin-bottom:14px">Lowercase letters, numbers and dashes. You can change it later.</p>' : ""}
         <button class="primary">Continue</button></div>`),
     },
     connect: {

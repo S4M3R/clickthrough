@@ -22,7 +22,7 @@ Zero runtime dependencies. Node >= 18. ESM.
 
 ```json
 {
-  "id": "acme-onboarding",
+  "id": "onboarding",
   "title": "Acme onboarding",
   "start": "welcome",
   "screens": {
@@ -170,6 +170,7 @@ All JSON. Errors: `{error}` with 4xx/5xx.
 
 ```
 clickthrough                                     # = serve --open, every project
+clickthrough demo    [--port 4778] [--reset] [--no-open]   # the bundled example, as a private copy
 clickthrough serve   [--port 4777] [--open] [--dir … | --project …]
 clickthrough projects [add [<id>] [--dir] [--name] | remove <id>]
 clickthrough init    <flow> --title "Acme onboarding" [--start <screen>]
@@ -186,3 +187,11 @@ clickthrough boxes-script                          # prints the path of capture/
 `--boxes` takes the JSON string produced by evaluating `capture/boxes.js` in the
 page (`{url,vw,W,H,items:[{tag,role,label,x,y,w,h}]}`); the CLI converts it into
 `items` (`k`/`l`), drops duplicates and off-canvas boxes, and sorts by area.
+
+## Demo
+
+`clickthrough demo` copies the package's `examples/` folder to
+`$CLICKTHROUGH_HOME/demo` (once; `--reset` copies it again) and serves that copy
+alone as project `demo`, without adding it to the registry. It listens on 4778,
+or on any free port when 4778 is taken and no `--port` was given, and opens
+`/p/demo/onboarding/signup`. The example is built by `site/demo/build-example.mjs`.

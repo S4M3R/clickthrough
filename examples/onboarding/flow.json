@@ -1,0 +1,875 @@
+{
+  "id": "onboarding",
+  "title": "Signup and onboarding",
+  "start": "signup",
+  "screens": {
+    "signup": {
+      "title": "Create your account",
+      "route": "/signup",
+      "versions": [
+        {
+          "v": 1,
+          "image": "shots/signup-v1.png",
+          "W": 960,
+          "H": 620,
+          "note": "",
+          "at": "2026-11-11T01:52:50.884Z",
+          "items": [
+            {
+              "k": "Button",
+              "l": "Continue with Google",
+              "x": 280,
+              "y": 168,
+              "w": 400,
+              "h": 42
+            },
+            {
+              "k": "Button",
+              "l": "Continue with GitHub",
+              "x": 280,
+              "y": 220,
+              "w": 400,
+              "h": 42
+            },
+            {
+              "k": "Button",
+              "l": "Create account",
+              "x": 280,
+              "y": 462,
+              "w": 400,
+              "h": 42
+            },
+            {
+              "k": "Input",
+              "l": "you@company.com",
+              "x": 280,
+              "y": 330,
+              "w": 400,
+              "h": 40
+            },
+            {
+              "k": "Input",
+              "l": "At least 12 characters",
+              "x": 280,
+              "y": 408,
+              "w": 400,
+              "h": 40
+            },
+            {
+              "k": "Heading",
+              "l": "Create your account",
+              "x": 280,
+              "y": 92,
+              "w": 400,
+              "h": 30
+            },
+            {
+              "k": "Text",
+              "l": "Start your free trial. No card required.",
+              "x": 280,
+              "y": 128,
+              "w": 400,
+              "h": 22
+            },
+            {
+              "k": "Label",
+              "l": "Email",
+              "x": 280,
+              "y": 307,
+              "w": 400,
+              "h": 19
+            },
+            {
+              "k": "Label",
+              "l": "Password",
+              "x": 280,
+              "y": 384,
+              "w": 400,
+              "h": 19
+            }
+          ]
+        },
+        {
+          "v": 2,
+          "image": "shots/signup-v2.png",
+          "W": 960,
+          "H": 620,
+          "note": "GitHub button first",
+          "at": "2026-11-11T01:52:53.306Z",
+          "items": [
+            {
+              "k": "Button",
+              "l": "Continue with GitHub",
+              "x": 280,
+              "y": 168,
+              "w": 400,
+              "h": 42
+            },
+            {
+              "k": "Button",
+              "l": "Continue with Google",
+              "x": 280,
+              "y": 220,
+              "w": 400,
+              "h": 42
+            },
+            {
+              "k": "Button",
+              "l": "Create account",
+              "x": 280,
+              "y": 462,
+              "w": 400,
+              "h": 42
+            },
+            {
+              "k": "Input",
+              "l": "you@company.com",
+              "x": 280,
+              "y": 330,
+              "w": 400,
+              "h": 40
+            },
+            {
+              "k": "Input",
+              "l": "At least 12 characters",
+              "x": 280,
+              "y": 408,
+              "w": 400,
+              "h": 40
+            },
+            {
+              "k": "Heading",
+              "l": "Create your account",
+              "x": 280,
+              "y": 92,
+              "w": 400,
+              "h": 30
+            },
+            {
+              "k": "Text",
+              "l": "Start your free trial. No card required.",
+              "x": 280,
+              "y": 128,
+              "w": 400,
+              "h": 22
+            },
+            {
+              "k": "Label",
+              "l": "Email",
+              "x": 280,
+              "y": 307,
+              "w": 400,
+              "h": 19
+            },
+            {
+              "k": "Label",
+              "l": "Password",
+              "x": 280,
+              "y": 384,
+              "w": 400,
+              "h": 19
+            }
+          ]
+        }
+      ]
+    },
+    "verify": {
+      "title": "Check your email",
+      "route": "/signup/verify",
+      "versions": [
+        {
+          "v": 1,
+          "image": "shots/verify-v1.png",
+          "W": 960,
+          "H": 620,
+          "note": "",
+          "at": "2026-11-11T01:52:50.984Z",
+          "items": [
+            {
+              "k": "Button",
+              "l": "Verify",
+              "x": 280,
+              "y": 246,
+              "w": 400,
+              "h": 42
+            },
+            {
+              "k": "Button",
+              "l": "Resend code",
+              "x": 280,
+              "y": 298,
+              "w": 400,
+              "h": 42
+            },
+            {
+              "k": "Input",
+              "l": "123456",
+              "x": 280,
+              "y": 192,
+              "w": 400,
+              "h": 40
+            },
+            {
+              "k": "Heading",
+              "l": "Check your email",
+              "x": 280,
+              "y": 92,
+              "w": 400,
+              "h": 30
+            },
+            {
+              "k": "Text",
+              "l": "We sent a 6-digit code to dana@northwind.example.",
+              "x": 280,
+              "y": 128,
+              "w": 400,
+              "h": 22
+            },
+            {
+              "k": "Label",
+              "l": "Code",
+              "x": 280,
+              "y": 168,
+              "w": 400,
+              "h": 19
+            }
+          ]
+        }
+      ]
+    },
+    "google": {
+      "title": "Google sign-in (placeholder)",
+      "route": "accounts.google.com",
+      "versions": [
+        {
+          "v": 1,
+          "image": "shots/google-v1.png",
+          "W": 960,
+          "H": 620,
+          "note": "Third-party page. Stands for Google's account chooser and consent screen.",
+          "at": "2026-11-11T01:52:51.087Z",
+          "items": [
+            {
+              "k": "Text",
+              "l": "The person picks a Google account and allows Acme to read their name and email.",
+              "x": 303,
+              "y": 188,
+              "w": 354,
+              "h": 44
+            },
+            {
+              "k": "Button",
+              "l": "Allow and return to Acme",
+              "x": 303,
+              "y": 250,
+              "w": 354,
+              "h": 42
+            },
+            {
+              "k": "Heading",
+              "l": "Google sign-in",
+              "x": 303,
+              "y": 152,
+              "w": 354,
+              "h": 30
+            }
+          ]
+        }
+      ]
+    },
+    "github": {
+      "title": "GitHub authorization (placeholder)",
+      "route": "github.com/login/oauth",
+      "versions": [
+        {
+          "v": 1,
+          "image": "shots/github-v1.png",
+          "W": 960,
+          "H": 620,
+          "note": "Third-party page. Stands for GitHub's authorize screen.",
+          "at": "2026-11-11T01:52:51.177Z",
+          "items": [
+            {
+              "k": "Text",
+              "l": "The person signs in to GitHub and authorizes the Acme app to read their profile ",
+              "x": 303,
+              "y": 188,
+              "w": 354,
+              "h": 44
+            },
+            {
+              "k": "Button",
+              "l": "Authorize Acme",
+              "x": 303,
+              "y": 250,
+              "w": 354,
+              "h": 42
+            },
+            {
+              "k": "Heading",
+              "l": "Connect GitHub to Acme",
+              "x": 303,
+              "y": 152,
+              "w": 354,
+              "h": 30
+            }
+          ]
+        }
+      ]
+    },
+    "workspace": {
+      "title": "Name your workspace",
+      "route": "/onboarding/workspace",
+      "versions": [
+        {
+          "v": 1,
+          "image": "shots/workspace-v1.png",
+          "W": 960,
+          "H": 620,
+          "note": "",
+          "at": "2026-11-11T01:52:51.280Z",
+          "items": [
+            {
+              "k": "Button",
+              "l": "Continue",
+              "x": 280,
+              "y": 323,
+              "w": 400,
+              "h": 42
+            },
+            {
+              "k": "Input",
+              "l": "Northwind Analytics",
+              "x": 280,
+              "y": 192,
+              "w": 400,
+              "h": 40
+            },
+            {
+              "k": "Input",
+              "l": "acme.example/northwind",
+              "x": 280,
+              "y": 269,
+              "w": 400,
+              "h": 40
+            },
+            {
+              "k": "Heading",
+              "l": "Name your workspace",
+              "x": 280,
+              "y": 92,
+              "w": 400,
+              "h": 30
+            },
+            {
+              "k": "Text",
+              "l": "This is where your team's dashboards live.",
+              "x": 280,
+              "y": 128,
+              "w": 400,
+              "h": 22
+            },
+            {
+              "k": "Label",
+              "l": "Workspace name",
+              "x": 280,
+              "y": 168,
+              "w": 400,
+              "h": 19
+            },
+            {
+              "k": "Label",
+              "l": "Workspace URL",
+              "x": 280,
+              "y": 246,
+              "w": 400,
+              "h": 19
+            }
+          ]
+        },
+        {
+          "v": 2,
+          "image": "shots/workspace-v2.png",
+          "W": 960,
+          "H": 620,
+          "note": "Hint under the URL field",
+          "at": "2026-11-11T01:52:53.452Z",
+          "items": [
+            {
+              "k": "Button",
+              "l": "Continue",
+              "x": 280,
+              "y": 348,
+              "w": 400,
+              "h": 42
+            },
+            {
+              "k": "Input",
+              "l": "Northwind Analytics",
+              "x": 280,
+              "y": 192,
+              "w": 400,
+              "h": 40
+            },
+            {
+              "k": "Input",
+              "l": "acme.example/northwind",
+              "x": 280,
+              "y": 269,
+              "w": 400,
+              "h": 40
+            },
+            {
+              "k": "Heading",
+              "l": "Name your workspace",
+              "x": 280,
+              "y": 92,
+              "w": 400,
+              "h": 30
+            },
+            {
+              "k": "Text",
+              "l": "This is where your team's dashboards live.",
+              "x": 280,
+              "y": 128,
+              "w": 400,
+              "h": 22
+            },
+            {
+              "k": "Label",
+              "l": "Workspace name",
+              "x": 280,
+              "y": 168,
+              "w": 400,
+              "h": 19
+            },
+            {
+              "k": "Label",
+              "l": "Workspace URL",
+              "x": 280,
+              "y": 246,
+              "w": 400,
+              "h": 19
+            },
+            {
+              "k": "Text",
+              "l": "Lowercase letters, numbers and dashes. You can change it later.",
+              "x": 280,
+              "y": 315,
+              "w": 400,
+              "h": 19
+            }
+          ]
+        }
+      ]
+    },
+    "connect": {
+      "title": "Connect your data",
+      "route": "/onboarding/connect",
+      "versions": [
+        {
+          "v": 1,
+          "image": "shots/connect-v1.png",
+          "W": 960,
+          "H": 620,
+          "note": "",
+          "at": "2026-11-11T01:52:51.385Z",
+          "items": [
+            {
+              "k": "Button",
+              "l": "Use the API instead",
+              "x": 200,
+              "y": 336,
+              "w": 560,
+              "h": 42
+            },
+            {
+              "k": "Button",
+              "l": "Postgres Read-only connection",
+              "x": 200,
+              "y": 168,
+              "w": 275,
+              "h": 74
+            },
+            {
+              "k": "Button",
+              "l": "Stripe Payments and subscriptions",
+              "x": 485,
+              "y": 168,
+              "w": 275,
+              "h": 74
+            },
+            {
+              "k": "Button",
+              "l": "Segment Forward your existing events",
+              "x": 200,
+              "y": 252,
+              "w": 275,
+              "h": 74
+            },
+            {
+              "k": "Button",
+              "l": "CSV upload One-off import",
+              "x": 485,
+              "y": 252,
+              "w": 275,
+              "h": 74
+            },
+            {
+              "k": "Heading",
+              "l": "Connect your data",
+              "x": 200,
+              "y": 92,
+              "w": 560,
+              "h": 30
+            },
+            {
+              "k": "Text",
+              "l": "Pick where your events come from. You can add more later.",
+              "x": 200,
+              "y": 128,
+              "w": 560,
+              "h": 22
+            }
+          ]
+        }
+      ]
+    },
+    "postgres": {
+      "title": "Connect Postgres",
+      "route": "/onboarding/connect/postgres",
+      "versions": [
+        {
+          "v": 1,
+          "image": "shots/postgres-v1.png",
+          "W": 960,
+          "H": 620,
+          "note": "",
+          "at": "2026-11-11T01:52:51.486Z",
+          "items": [
+            {
+              "k": "Button",
+              "l": "Test and connect",
+              "x": 280,
+              "y": 401,
+              "w": 400,
+              "h": 42
+            },
+            {
+              "k": "Input",
+              "l": "db.northwind.example",
+              "x": 280,
+              "y": 192,
+              "w": 400,
+              "h": 40
+            },
+            {
+              "k": "Input",
+              "l": "analytics",
+              "x": 280,
+              "y": 269,
+              "w": 400,
+              "h": 40
+            },
+            {
+              "k": "Input",
+              "l": "acme_reader",
+              "x": 280,
+              "y": 347,
+              "w": 400,
+              "h": 40
+            },
+            {
+              "k": "Heading",
+              "l": "Connect Postgres",
+              "x": 280,
+              "y": 92,
+              "w": 400,
+              "h": 30
+            },
+            {
+              "k": "Text",
+              "l": "Use a read-only user. Acme never writes to your database.",
+              "x": 280,
+              "y": 128,
+              "w": 400,
+              "h": 22
+            },
+            {
+              "k": "Label",
+              "l": "Host",
+              "x": 280,
+              "y": 168,
+              "w": 400,
+              "h": 19
+            },
+            {
+              "k": "Label",
+              "l": "Database",
+              "x": 280,
+              "y": 246,
+              "w": 400,
+              "h": 19
+            },
+            {
+              "k": "Label",
+              "l": "Read-only user",
+              "x": 280,
+              "y": 323,
+              "w": 400,
+              "h": 19
+            }
+          ]
+        }
+      ]
+    },
+    "stripe": {
+      "title": "Connect Stripe",
+      "route": "/onboarding/connect/stripe",
+      "versions": [
+        {
+          "v": 1,
+          "image": "shots/stripe-v1.png",
+          "W": 960,
+          "H": 620,
+          "note": "",
+          "at": "2026-11-11T01:52:51.592Z",
+          "items": [
+            {
+              "k": "List item",
+              "l": "Customers read",
+              "x": 281,
+              "y": 169,
+              "w": 398,
+              "h": 43
+            },
+            {
+              "k": "List item",
+              "l": "Subscriptions read",
+              "x": 281,
+              "y": 212,
+              "w": 398,
+              "h": 43
+            },
+            {
+              "k": "Button",
+              "l": "Approve in Stripe",
+              "x": 280,
+              "y": 317,
+              "w": 400,
+              "h": 42
+            },
+            {
+              "k": "Button",
+              "l": "Pick another source",
+              "x": 280,
+              "y": 369,
+              "w": 400,
+              "h": 42
+            },
+            {
+              "k": "List item",
+              "l": "Invoices read",
+              "x": 281,
+              "y": 255,
+              "w": 398,
+              "h": 42
+            },
+            {
+              "k": "Heading",
+              "l": "Connect Stripe",
+              "x": 280,
+              "y": 92,
+              "w": 400,
+              "h": 30
+            },
+            {
+              "k": "Text",
+              "l": "Acme asks for read access to these objects:",
+              "x": 280,
+              "y": 128,
+              "w": 400,
+              "h": 22
+            }
+          ]
+        }
+      ]
+    },
+    "api": {
+      "title": "Send events with the API",
+      "route": "/onboarding/connect/api",
+      "versions": [
+        {
+          "v": 1,
+          "image": "shots/api-v1.png",
+          "W": 960,
+          "H": 620,
+          "note": "",
+          "at": "2026-11-11T01:52:51.694Z",
+          "items": [
+            {
+              "k": "Code",
+              "l": "curl https://api.acme.example/v1/events \\ -H \"Authorization: Bearer ak_test_demo",
+              "x": 200,
+              "y": 168,
+              "w": 560,
+              "h": 88
+            },
+            {
+              "k": "Button",
+              "l": "I sent an event",
+              "x": 200,
+              "y": 272,
+              "w": 560,
+              "h": 42
+            },
+            {
+              "k": "Heading",
+              "l": "Send events with the API",
+              "x": 200,
+              "y": 92,
+              "w": 560,
+              "h": 30
+            },
+            {
+              "k": "Text",
+              "l": "Send one event and this page moves on by itself.",
+              "x": 200,
+              "y": 128,
+              "w": 560,
+              "h": 22
+            }
+          ]
+        }
+      ]
+    },
+    "done": {
+      "title": "You're all set",
+      "route": "/onboarding/done",
+      "versions": [
+        {
+          "v": 1,
+          "image": "shots/done-v1.png",
+          "W": 960,
+          "H": 620,
+          "note": "",
+          "at": "2026-11-11T01:52:51.799Z",
+          "items": [
+            {
+              "k": "Button",
+              "l": "Open dashboard",
+              "x": 280,
+              "y": 228,
+              "w": 400,
+              "h": 42
+            },
+            {
+              "k": "Button",
+              "l": "Invite teammates",
+              "x": 280,
+              "y": 280,
+              "w": 400,
+              "h": 42
+            },
+            {
+              "k": "Heading",
+              "l": "You're all set",
+              "x": 280,
+              "y": 152,
+              "w": 400,
+              "h": 30
+            },
+            {
+              "k": "Text",
+              "l": "Your first dashboard fills in as events arrive.",
+              "x": 280,
+              "y": 188,
+              "w": 400,
+              "h": 22
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "edges": [
+    {
+      "from": "signup",
+      "to": "github",
+      "label": "Sign up with GitHub",
+      "via": "Continue with GitHub"
+    },
+    {
+      "from": "signup",
+      "to": "google",
+      "label": "Sign up with Google",
+      "via": "Continue with Google"
+    },
+    {
+      "from": "signup",
+      "to": "verify",
+      "label": "Email and password",
+      "via": "Create account"
+    },
+    {
+      "from": "verify",
+      "to": "workspace",
+      "label": "Verify",
+      "via": "Verify"
+    },
+    {
+      "from": "google",
+      "to": "workspace",
+      "label": "Allow",
+      "via": "Allow and return"
+    },
+    {
+      "from": "github",
+      "to": "workspace",
+      "label": "Authorize",
+      "via": "Authorize Acme"
+    },
+    {
+      "from": "workspace",
+      "to": "connect",
+      "label": "Continue",
+      "via": "Continue"
+    },
+    {
+      "from": "connect",
+      "to": "postgres",
+      "label": "Postgres",
+      "via": "Postgres"
+    },
+    {
+      "from": "connect",
+      "to": "stripe",
+      "label": "Stripe",
+      "via": "Stripe"
+    },
+    {
+      "from": "connect",
+      "to": "api",
+      "label": "API",
+      "via": "Use the API instead"
+    },
+    {
+      "from": "postgres",
+      "to": "done",
+      "label": "Test and connect",
+      "via": "Test and connect"
+    },
+    {
+      "from": "stripe",
+      "to": "done",
+      "label": "Approve in Stripe",
+      "via": "Approve in Stripe"
+    },
+    {
+      "from": "api",
+      "to": "done",
+      "label": "First event received",
+      "via": "I sent an event"
+    }
+  ]
+}

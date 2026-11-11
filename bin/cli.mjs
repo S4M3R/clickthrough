@@ -16,6 +16,7 @@ const HELP = `clickthrough: click through a product flow, comment on any compone
 
 Usage:
   clickthrough                                       Open the review in your browser (all projects)
+  clickthrough demo     [--port 4778] [--reset]      Open an example flow you can click and comment on
   clickthrough serve    [--port 4777] [--open]       Same, without opening the browser
   clickthrough projects                              List your projects
   clickthrough projects add [<id>] [--dir <path>] [--name "Acme web"]
@@ -113,10 +114,7 @@ async function main() {
       const list = typeof projects === "function" ? await projects() : projects;
       console.log(`Clickthrough is running at ${url}`);
       for (const p of list) console.log(`  ${p.id.padEnd(20)} ${p.dir}`);
-      if (opts.open && !opts["no-open"]) {
-        const opener = process.platform === "darwin" ? "open" : process.platform === "win32" ? "start" : "xdg-open";
-        spawn(opener, [url], { stdio: "ignore", detached: true, shell: process.platform === "win32" }).unref();
-      }
+      if (opts.open && !opts["no-open"]) openBrowser(url);
       return;
     }
     case "projects": {
@@ -235,6 +233,30 @@ async function main() {
         : async () => [{ project: projectOpt || undefined, store }];
       return watchComments(targets, pos[0], Boolean(opts.backlog), opts.all ? "all projects" : store.dir);
     }
+    case "demo": {
+      // A private copy of the bundled example, so comments left on it stay out of
+      // the package folder. It is served on its own and not added to the registry.
+      const dest = path.join(path.dirname(registryFile()), "demo");
+      if (opts.reset) await fs.rm(dest, { recursive: true, force: true });
+      if (!(await exists(dest))) await fs.cp(path.join(ROOT, "examples"), dest, { recursive: true });
+      const app = createServer({ projects: [{ id: "demo", name: "Acme (demo)", dir: dest }] });
+      const host = opts.host || "127.0.0.1";
+      const port = await app.listen(Number(opts.port || 4778), host).catch((err) => {
+        if (err.code !== "EADDRINUSE" || opts.port) throw err;
+        return app.listen(0, host); // 4778 is taken: any free port
+      });
+      const url = `http://localhost:${port}/p/demo/onboarding/signup`;
+      console.log(`Clickthrough demo: ${url}
+
+A made-up product ("Acme") with comments in every state. Things to try:
+  - Changes (in the sidebar): one change waits for your check. Open it for the before and after.
+  - Press N and click through the signup like the real app. Press C and click any component to comment.
+No agent is attached, so new comments stay "Working". To see what an agent gets:
+  clickthrough comments --dir "${dest}" --open
+Start over with: clickthrough demo --reset`);
+      if (!opts["no-open"]) openBrowser(url);
+      return;
+    }
     case "boxes-script":
       return console.log(path.join(ROOT, "capture", "boxes.js"));
     case "help":
@@ -292,6 +314,11 @@ async function watchComments(getTargets, onlyFlow, backlog, label) {
   await tick();
   console.error(`Watching ${onlyFlow ? `flow "${onlyFlow}" in ` : ""}${label} for new comments…`);
   setInterval(() => tick().catch((e) => console.error(e.message)), 1000);
+}
+
+function openBrowser(url) {
+  const opener = process.platform === "darwin" ? "open" : process.platform === "win32" ? "start" : "xdg-open";
+  spawn(opener, [url], { stdio: "ignore", detached: true, shell: process.platform === "win32" }).on("error", () => {}).unref();
 }
 
 /** ./.clickthrough, or a project's pre-rename ./.flow-reviews if that is what it has. */

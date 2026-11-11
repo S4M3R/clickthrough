@@ -22,6 +22,7 @@ project registry, so your real Clickthrough projects are not touched.
 | `agent.sh` | The agent's side: captures the changed screen, then runs `clickthrough screen` and `clickthrough done` with evidence. |
 | `record.mjs` | Drives the review UI as a reviewer, runs `clickthrough watch` and `agent.sh`, writes `demo.mp4`, `demo.gif`, `demo-poster.jpg`. |
 | `shots.mjs` | Stills for the page; ends by running `og.mjs`. |
+| `build-example.mjs` | Rebuilds `examples/`, the flow `clickthrough demo` serves (`npm run example`). |
 | `og.mjs` | Renders the social image from `og.html` (`npm run og`). |
 | `preview.mjs` | Screenshots of the landing page at desktop, tablet and phone widths. |
 
