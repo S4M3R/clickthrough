@@ -21,7 +21,8 @@ project registry, so your real Clickthrough projects are not touched.
 | `build-flows.mjs` | Captures every screen and builds the flows with the CLI (`init`, `screen`, `edge`). |
 | `agent.sh` | The agent's side: captures the changed screen, then runs `clickthrough screen` and `clickthrough done` with evidence. |
 | `record.mjs` | Drives the review UI as a reviewer, runs `clickthrough watch` and `agent.sh`, writes `demo.mp4`, `demo.gif`, `demo-poster.jpg`. |
-| `shots.mjs` | Stills for the page and the social image (`og.html`). |
+| `shots.mjs` | Stills for the page; ends by running `og.mjs`. |
+| `og.mjs` | Renders the social image from `og.html` (`npm run og`). |
 | `preview.mjs` | Screenshots of the landing page at desktop, tablet and phone widths. |
 
 What is scripted and what is real:

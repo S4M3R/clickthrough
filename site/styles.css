@@ -1,18 +1,19 @@
 /* Clickthrough landing page. The look borrows from the tool itself: a design
-   canvas, the blue selection outline, and a branch tree for the contents. */
+   canvas, the selection box with its label (the brand's one device), and a
+   branch tree for the contents. */
 :root {
-  --canvas: #eef0f4;
-  --dot: #cdd2dc;
+  --canvas: #f5f5f7;
+  --dot: #d4d4dc;
   --panel: #ffffff;
-  --ink: #12141a;
+  --ink: #18181b;
   --muted: #555b6a;
   --line: #d8dce4;
-  --blue: oklch(0.55 0.2 258);
-  --blue-wash: oklch(0.55 0.2 258 / 0.1);
+  --select: #7b4dff; /* the selection colour */
+  --select-wash: rgb(123 77 255 / 0.1);
   --green: oklch(0.508 0.118 166);
-  --code-bg: #14171f;
+  --code-bg: #18181b;
   --code-fg: #e4e7ee;
-  --display: "Bricolage Grotesque", "Geist", system-ui, sans-serif;
+  --display: "Geist", ui-sans-serif, system-ui, sans-serif;
   --sans: "Geist", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   --rail: 264px;
@@ -29,8 +30,8 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 [hidden] { display: none !important; }
-a { color: var(--blue); text-underline-offset: 3px; }
-:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; border-radius: 4px; }
+a { color: var(--select); text-underline-offset: 3px; }
+:focus-visible { outline: 2px solid var(--select); outline-offset: 3px; border-radius: 4px; }
 .skip { position: absolute; left: -999px; top: 8px; background: var(--panel); padding: 8px 12px; border-radius: 6px; z-index: 20; }
 .skip:focus { left: 8px; }
 code, kbd, pre { font-family: var(--mono); }
@@ -38,8 +39,24 @@ p code, li code, figcaption code { font-size: 0.88em; background: rgb(18 20 26 /
 kbd { font-size: 0.8em; border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 5px; padding: 1px 6px; background: var(--panel); }
 
 /* ---------- brand ---------- */
-.brand { display: inline-flex; align-items: center; gap: 9px; font-weight: 600; font-size: 16px; color: var(--ink); text-decoration: none; }
-.logo { width: 20px; height: 20px; border-radius: 6px; background: linear-gradient(135deg, var(--blue), oklch(0.65 0.15 220)); }
+.brand { display: inline-block; color: var(--ink); text-decoration: none; font: 600 18px/1 var(--sans); letter-spacing: -0.035em; padding-top: 16px; }
+
+/* The selection box: outline, four handles and the component's label. The
+   wordmark and the main headline are always shown selected. */
+.sel { position: relative; display: inline-block; outline: 1.5px solid var(--select); outline-offset: 0; padding: 0.22em 0.36em; }
+.sel::before { content: attr(data-k); position: absolute; left: -1.5px; bottom: calc(100% + 1.5px); background: var(--select); color: #fff; font: 500 10.5px/1 var(--mono); letter-spacing: 0; padding: 3px 5px; white-space: nowrap; }
+.sel i { position: absolute; width: 7px; height: 7px; background: #fff; border: 1.5px solid var(--select); }
+.sel i:nth-of-type(1) { left: -4px; top: -4px; }
+.sel i:nth-of-type(2) { right: -4px; top: -4px; }
+.sel i:nth-of-type(3) { left: -4px; bottom: -4px; }
+.sel i:nth-of-type(4) { right: -4px; bottom: -4px; }
+h1 .sel { padding: 0.12em 0.16em; margin-left: -0.16em; }
+h1 .sel::before { font-size: 12px; padding: 4px 6px; }
+h1 .sel i { width: 9px; height: 9px; }
+h1 .sel i:nth-of-type(1), h1 .sel i:nth-of-type(3) { left: -5px; }
+h1 .sel i:nth-of-type(2), h1 .sel i:nth-of-type(4) { right: -5px; }
+h1 .sel i:nth-of-type(1), h1 .sel i:nth-of-type(2) { top: -5px; }
+h1 .sel i:nth-of-type(3), h1 .sel i:nth-of-type(4) { bottom: -5px; }
 
 /* ---------- top bar (small screens) ---------- */
 .top { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; }
@@ -51,7 +68,7 @@ kbd { font-size: 0.8em; border: 1px solid var(--line); border-bottom-width: 2px;
 .tree ul { margin: 2px 0 8px 13px; padding-left: 8px; border-left: 1px solid var(--line); }
 .row { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 6px; font-size: 14px; color: var(--ink); text-decoration: none; }
 a.row:hover { background: rgb(18 20 26 / 0.05); }
-a.row[aria-current="true"] { background: var(--blue-wash); }
+a.row[aria-current="true"] { background: var(--select-wash); }
 .row .n { flex: none; min-width: 18px; font: 11px var(--mono); color: var(--muted); }
 .row.branch { color: var(--muted); font-weight: 500; font-size: 13.5px; padding: 5px 6px; }
 .row.join { color: var(--muted); font-size: 13.5px; }
@@ -63,8 +80,8 @@ main { max-width: 1040px; margin: 0 auto; padding: 0 20px; }
 section { padding: 44px 0; }
 section + section { border-top: 1px solid var(--line); }
 h1, h2, h3 { margin: 0; text-wrap: balance; }
-h1 { font: 700 clamp(2.5rem, 7.4vw, 4.75rem) / 0.98 var(--display); letter-spacing: -0.035em; max-width: 13em; }
-h2 { font: 700 clamp(1.75rem, 4vw, 2.5rem) / 1.05 var(--display); letter-spacing: -0.025em; margin-bottom: 16px; }
+h1 { font: 600 clamp(2.25rem, 6.6vw, 4.25rem) / 1.02 var(--display); letter-spacing: -0.045em; max-width: 14em; padding-top: 22px; }
+h2 { font: 600 clamp(1.625rem, 3.6vw, 2.25rem) / 1.08 var(--display); letter-spacing: -0.035em; margin-bottom: 16px; }
 h3 { font: 600 1.0625rem / 1.3 var(--sans); margin-bottom: 6px; }
 p { margin: 0 0 14px; max-width: 34em; text-wrap: pretty; }
 section p { color: #2c303b; }
@@ -79,7 +96,7 @@ section p { color: #2c303b; }
 /* ---------- commands ---------- */
 .cmd { display: flex; align-items: center; gap: 10px; max-width: 100%; background: var(--code-bg); color: var(--code-fg); border-radius: 10px; padding: 6px 6px 6px 16px; }
 .cmd code { flex: 1; min-width: 0; overflow-x: auto; white-space: nowrap; font-size: 14.5px; padding: 8px 0; scrollbar-width: none; }
-.p { color: #7ea2ff; user-select: none; margin-right: 4px; }
+.p { color: #b39dff; user-select: none; margin-right: 4px; }
 .copy { flex: none; font: 500 13.5px var(--sans); color: var(--code-fg); background: rgb(255 255 255 / 0.1); border: 1px solid rgb(255 255 255 / 0.16); border-radius: 7px; padding: 7px 12px; min-width: 64px; cursor: pointer; }
 .copy:hover { background: rgb(255 255 255 / 0.18); }
 .copy.ok { color: #7fe0b6; }
@@ -88,7 +105,7 @@ pre { margin: 18px 0 0; background: var(--code-bg); color: var(--code-fg); borde
 .or { margin: 0; font-size: 14px; color: var(--muted); }
 .prompt { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 20px; box-shadow: var(--shadow); }
 .prompt p { font-size: 1rem; line-height: 1.5; overflow-wrap: break-word; color: var(--ink); }
-.prompt .copy { color: #fff; background: var(--blue); border-color: transparent; }
+.prompt .copy { color: #fff; background: var(--select); border-color: transparent; }
 .prompt .copy:hover { filter: brightness(1.08); }
 
 /* ---------- screenshots ---------- */
@@ -106,7 +123,7 @@ pre { margin: 18px 0 0; background: var(--code-bg); color: var(--code-fg); borde
 /* ---------- the loop: a real sequence, so it is numbered ---------- */
 .loop { list-style: none; margin: 8px 0 0; padding: 0; counter-reset: step; display: grid; gap: 0; }
 .loop li { counter-increment: step; position: relative; padding: 0 0 22px 44px; }
-.loop li::before { content: counter(step); position: absolute; left: 0; top: 0; width: 26px; height: 26px; border-radius: 13px 13px 13px 4px; background: var(--blue); color: #fff; font: 600 13px/26px var(--sans); text-align: center; }
+.loop li::before { content: counter(step); position: absolute; left: 0; top: 0; width: 26px; height: 26px; border-radius: 0; background: var(--select); color: #fff; font: 600 13px/26px var(--sans); text-align: center; }
 .loop li::after { content: ""; position: absolute; left: 12.5px; top: 32px; bottom: 4px; width: 1px; background: var(--line); }
 .loop li:last-child { padding-bottom: 0; }
 .loop li:last-child::before { background: var(--green); }
@@ -121,7 +138,7 @@ pre { margin: 18px 0 0; background: var(--code-bg); color: var(--code-fg); borde
 .modes { margin-top: 20px; }
 .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 9px; overflow: hidden; background: var(--panel); }
 .seg button { border: 0; background: transparent; font: 500 15px var(--sans); color: var(--muted); padding: 9px 18px; cursor: pointer; }
-.seg button[aria-pressed="true"] { background: var(--blue); color: #fff; }
+.seg button[aria-pressed="true"] { background: var(--select); color: #fff; }
 .mode { margin-top: 18px; }
 .mode p { max-width: 44em; }
 
@@ -139,11 +156,11 @@ footer { max-width: 1040px; margin: 0 auto; padding: 22px 20px 40px; border-top:
 /* ---------- hover a heading or a command: it is outlined like a component in the tool ---------- */
 @media (hover: hover) {
   [data-c] { position: relative; }
-  h1[data-c]:hover, h2[data-c]:hover, .prompt[data-c]:hover, .cmd[data-c]:hover, pre[data-c]:hover { outline: 2px solid var(--blue); outline-offset: 5px; border-radius: 6px; }
-  h1[data-c]:hover::after, h2[data-c]:hover::after {
+  h2[data-c]:hover, .prompt[data-c]:hover, .cmd[data-c]:hover, pre[data-c]:hover { outline: 1.5px solid var(--select); outline-offset: 5px; border-radius: 0; }
+  h2[data-c]:hover::after, .prompt[data-c]:hover::after, .cmd[data-c]:hover::after, pre[data-c]:hover::after {
     content: attr(data-c);
-    position: absolute; left: -5px; top: calc(100% + 11px); z-index: 5;
-    font: 500 12px/1 var(--mono); letter-spacing: 0; color: #fff; background: var(--ink); padding: 6px 8px; border-radius: 6px; white-space: nowrap;
+    position: absolute; left: -6.5px; bottom: calc(100% + 6.5px); z-index: 5;
+    font: 500 10.5px/1 var(--mono); letter-spacing: 0; color: #fff; background: var(--select); padding: 3px 5px; white-space: nowrap;
   }
 }
 
@@ -168,7 +185,7 @@ footer { max-width: 1040px; margin: 0 auto; padding: 22px 20px 40px; border-top:
     position: fixed; inset: 0 auto 0 0; width: var(--rail); padding: 22px 14px 18px;
     background: var(--panel); border-right: 1px solid var(--line); overflow-y: auto;
   }
-  .rail .brand { padding: 0 8px; }
+  .rail .brand { margin: 0 8px; align-self: flex-start; }
   main, footer { margin-left: calc(var(--rail) + max(40px, (100vw - var(--rail) - 1040px) / 2)); margin-right: auto; }
   .hero { padding-top: 64px; }
 }
