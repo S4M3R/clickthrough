@@ -406,7 +406,35 @@ function renderCompare(box, cmp) {
   close.type = "button";
   close.title = "Show only the new version (Esc)";
   close.onclick = () => { state.compare = null; renderStage(); };
-  box.append(side("Before", cmp.beforeScreen, cmp.before, cmp.c.target), side("After", cmp.afterScreen, cmp.after, null), close);
+  box.append(side("Before", cmp.beforeScreen, cmp.before, cmp.c.target), side("After", cmp.afterScreen, cmp.after, null), close, compareFooter(cmp.c));
+}
+
+// Under the two screens: what was asked, what the agent says it did, and the decision.
+function compareFooter(c) {
+  const bar = el("div", "cmp-foot");
+  const text = el("div", "cmp-thread");
+  const said = [...c.replies].reverse().find((r) => r.author === "agent");
+  // The request is the latest thing the reviewer said before the agent finished.
+  const asked = [...c.replies].reverse().find((r) => r.author !== "agent")?.text || c.text;
+  text.append(el("p", "cmp-target-label", targetLabel(c.target)), message("reviewer", asked));
+  if (said) text.append(message("agent", said.text));
+  const acts = el("div", "cmp-acts");
+  const reply = el("button", "btn", "Reply");
+  reply.type = "button";
+  reply.title = "Say what is not right (R)";
+  reply.onclick = () => document.querySelector(`.thread[data-id="${CSS.escape(c.id)}"] .th-actions input[type="text"]`)?.focus();
+  acts.appendChild(reply);
+  if (needsCheck(c)) {
+    const ok = el("button", "btn primary", "Looks good");
+    ok.type = "button";
+    ok.title = "Accept this change (Y)";
+    ok.onclick = () => confirmChange(c);
+    acts.appendChild(ok);
+  } else {
+    acts.appendChild(el("span", "status-ok", "Checked"));
+  }
+  bar.append(text, acts);
+  return bar;
 }
 
 function setNavView(view) {

@@ -122,7 +122,8 @@ is a card with its state, the agent's reply, the component and the versions
 (`v1 → v2`), and a "Looks good" button while it waits. Opening one shows the
 screen before and after, side by side: "before" is the version the comment was
 left on (with the commented component outlined), "after" is the version in the
-agent's evidence. Without version evidence, or when both are the same version,
+agent's evidence. Under the two screens a bar repeats the request and the
+agent's reply, with "Reply" and "Looks good". Without version evidence, or when both are the same version,
 the single screen is shown. Accepting a change opens the next one that waits.
 Keys in this view: `↑`/`↓` (or `K`/`J`) pick a change, `Y` or `Enter` accepts
 it, `R` focuses the reply, `Esc` goes back to the single screen. The comments
