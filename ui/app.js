@@ -594,16 +594,17 @@ function closePopover() {
 const fileUrl = (rel) => `/files/${encodeURIComponent(state.flowId)}/${rel.split("/").map(encodeURIComponent).join("/")}`;
 const IMAGE_TYPES = ["image/png", "image/jpeg", "image/webp", "image/gif"];
 
-async function attachFiles(files) {
-  if (!state.draft) return;
+// Upload images into a draft's list (a new comment's or a reply's). `alive`
+// says whether that draft still exists; `redraw` repaints its thumbnails.
+async function uploadInto(images, files, alive, redraw) {
   for (const file of files) {
     if (!IMAGE_TYPES.includes(file.type)) { toast("Only PNG, JPEG, WebP or GIF images can be attached."); continue; }
     if (file.size > 10 * 1024 * 1024) { toast("Images can be up to 10 MB."); continue; }
-    if (state.draft.images.length >= 6) { toast("Up to 6 images per comment."); break; }
+    if (images.length >= 6) { toast("Up to 6 images per comment."); break; }
     // Show it straight away; the upload replaces the local preview with the stored path.
     const item = { preview: URL.createObjectURL(file), path: null };
-    state.draft.images.push(item);
-    renderDraftImages();
+    images.push(item);
+    redraw();
     try {
       const res = await fetch(`/api/flows/${encodeURIComponent(state.flowId)}/attachments`, {
         method: "POST",
@@ -615,18 +616,23 @@ async function attachFiles(files) {
       item.path = data.path;
     } catch (e) {
       toast(e.message);
-      if (state.draft) state.draft.images = state.draft.images.filter((x) => x !== item);
+      if (alive()) images.splice(images.indexOf(item), 1);
     }
-    renderDraftImages();
+    redraw();
   }
 }
 
-function renderDraftImages() {
-  const box = $("popImages");
+function attachFiles(files) {
+  const draft = state.draft;
+  if (!draft) return;
+  return uploadInto(draft.images, files, () => state.draft === draft, renderDraftImages);
+}
+
+// Thumbnails of a draft's images, each with a remove button.
+function drawThumbs(box, images, redraw) {
   box.textContent = "";
-  const imgs = state.draft?.images ?? [];
-  box.hidden = imgs.length === 0;
-  imgs.forEach((item, i) => {
+  box.hidden = images.length === 0;
+  images.forEach((item, i) => {
     const t = el("div", "pop-thumb" + (item.path ? "" : " uploading"));
     const img = el("img");
     img.src = item.preview;
@@ -634,10 +640,20 @@ function renderDraftImages() {
     const rm = el("button", null, "×");
     rm.type = "button";
     rm.setAttribute("aria-label", `Remove attachment ${i + 1}`);
-    rm.onclick = () => { state.draft.images.splice(i, 1); renderDraftImages(); };
+    rm.onclick = (e) => { e.stopPropagation(); images.splice(i, 1); redraw(); };
     t.append(img, rm);
     box.appendChild(t);
   });
+}
+
+// The reply being written on a thread: kept here so a live update does not lose it.
+function replyDraft(id) {
+  state.replies ??= {};
+  return (state.replies[id] ??= { text: "", images: [] });
+}
+
+function renderDraftImages() {
+  drawThumbs($("popImages"), state.draft?.images ?? [], renderDraftImages);
 }
 
 function imagesBlock(paths) {
@@ -689,6 +705,9 @@ async function submitPopover() {
 function renderThreads() {
   const box = $("threads");
   const scrollTop = box.scrollTop;
+  // A live update redraws the list: put the cursor back where it was.
+  const typing = document.activeElement?.closest?.(".thread")?.dataset.id;
+  const caret = typing ? [document.activeElement.selectionStart, document.activeElement.selectionEnd] : null;
   box.textContent = "";
   const all = screenComments(state.screenId);
   // "Open" keeps what still needs the reviewer: open threads and finished ones not checked yet.
@@ -730,13 +749,46 @@ function renderThreads() {
       card.appendChild(reps);
     }
 
+    const draft = replyDraft(c.id);
+    const thumbs = el("div", "pop-images th-images");
+    const redraw = () => drawThumbs(thumbs, draft.images, redraw);
+    const attach = (files) => uploadInto(draft.images, files, () => state.replies?.[c.id] === draft, redraw);
+    redraw();
+    card.appendChild(thumbs);
+
     const actions = el("div", "th-actions");
     const input = el("input");
     input.type = "text";
+    input.value = draft.text;
     input.placeholder = pending ? "Not right? Say what to change" : "Reply";
+    input.title = "Paste or drop an image to attach it";
     input.setAttribute("aria-label", `Reply to comment ${num}`);
     input.addEventListener("click", (e) => e.stopPropagation());
+    input.addEventListener("input", () => { draft.text = input.value; });
     input.addEventListener("keydown", (e) => { if (e.key === "Enter") sendReply(c, input); });
+    input.addEventListener("paste", (e) => {
+      const files = [...(e.clipboardData?.files ?? [])].filter((f) => f.type.startsWith("image/"));
+      if (files.length) { e.preventDefault(); attach(files); }
+    });
+    const clip = el("label", "btn icon attach");
+    clip.title = "Attach images (or paste / drop them)";
+    const file = el("input");
+    file.type = "file";
+    file.accept = IMAGE_TYPES.join(",");
+    file.multiple = true;
+    file.hidden = true;
+    file.addEventListener("change", () => { attach([...file.files]); file.value = ""; });
+    const glyph = el("span", null, "\u{1F4CE}");
+    glyph.setAttribute("aria-hidden", "true");
+    clip.append(file, glyph, el("span", "sr-only", "Attach images"));
+    clip.addEventListener("click", (e) => e.stopPropagation());
+    card.addEventListener("dragover", (e) => { e.preventDefault(); card.classList.add("dragging"); });
+    card.addEventListener("dragleave", () => card.classList.remove("dragging"));
+    card.addEventListener("drop", (e) => {
+      e.preventDefault();
+      card.classList.remove("dragging");
+      attach([...(e.dataTransfer?.files ?? [])]);
+    });
     const toggle = el("button", pending ? "btn primary" : "btn", pending ? "Looks good" : c.status === "resolved" ? "Reopen" : "Resolve");
     toggle.type = "button";
     toggle.onclick = (e) => {
@@ -744,13 +796,17 @@ function renderThreads() {
       if (pending) confirmChange(c);
       else setStatus(c, c.status === "resolved" ? "open" : "resolved");
     };
-    actions.append(input, toggle);
+    actions.append(input, clip, toggle);
     card.appendChild(actions);
 
     card.onclick = () => lightComment(c.id, false);
     box.appendChild(card);
   }
   box.scrollTop = scrollTop;
+  if (typing) {
+    const again = box.querySelector(`.thread[data-id="${CSS.escape(typing)}"] .th-actions input[type="text"]`);
+    if (again) { again.focus(); try { again.setSelectionRange(caret[0], caret[1]); } catch { /* not a text field */ } }
+  }
 }
 
 // What the agent showed to prove a change: the screen version, screenshots,
@@ -806,13 +862,17 @@ function message(author, text) {
 }
 
 async function sendReply(c, input) {
+  const draft = replyDraft(c.id);
   const text = input.value.trim();
-  if (!text) return;
+  if (draft.images.some((x) => !x.path)) { toast("Wait for the images to finish uploading."); return; }
+  const images = draft.images.map((x) => x.path);
+  if (!text && !images.length) return;
   input.disabled = true;
   try {
     const updated = await api(`/api/flows/${encodeURIComponent(state.flowId)}/comments/${encodeURIComponent(c.id)}/replies`, {
-      method: "POST", body: { text, author: "reviewer" },
+      method: "POST", body: { text, images, author: "reviewer" },
     });
+    delete state.replies[c.id];
     upsertComment(updated);
     renderAll();
   } catch (e) { toast(e.message); input.disabled = false; }
@@ -1141,7 +1201,7 @@ document.addEventListener("keydown", (e) => {
     }
     if (cur && e.key === "r") {
       e.preventDefault();
-      return document.querySelector(`.thread[data-id="${CSS.escape(cur.c.id)}"] input`)?.focus();
+      return document.querySelector(`.thread[data-id="${CSS.escape(cur.c.id)}"] .th-actions input[type="text"]`)?.focus();
     }
   }
   if (e.key === "ArrowRight") step(1);
