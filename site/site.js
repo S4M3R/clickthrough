@@ -54,3 +54,35 @@ for (const pan of document.querySelectorAll(".pan")) {
   const img = pan.querySelector("img");
   img.complete ? centre() : img.addEventListener("load", centre);
 }
+
+// The install button names one agent at a time. A click copies the setup prompt
+// and says where to paste it.
+const AGENTS = ["Claude Code", "Codex", "Cursor", "T3 Code"];
+const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
+let agent = 0;
+const installs = [...document.querySelectorAll(".install")];
+const showAgent = (animate) => {
+  for (const b of installs) {
+    if (b.classList.contains("ok")) continue;
+    const name = document.createElement("span");
+    name.textContent = AGENTS[agent];
+    if (animate) name.className = "in";
+    b.querySelector(".rotor").replaceChildren(name);
+  }
+};
+if (installs.length && !still) setInterval(() => { agent = (agent + 1) % AGENTS.length; showAgent(true); }, 2200);
+for (const b of installs) {
+  const html = b.innerHTML;
+  b.addEventListener("click", async () => {
+    const text = document.getElementById(b.dataset.copyFrom).textContent.trim();
+    const name = AGENTS[agent];
+    try {
+      await navigator.clipboard.writeText(text);
+      b.textContent = `Prompt copied. Paste it into ${name}`;
+    } catch {
+      b.textContent = "Could not copy. Open “See the prompt” below";
+    }
+    b.classList.add("ok");
+    setTimeout(() => { b.classList.remove("ok"); b.innerHTML = html; showAgent(false); }, 2600);
+  });
+}

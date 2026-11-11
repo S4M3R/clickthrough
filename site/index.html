@@ -75,27 +75,14 @@
   <section class="hero" id="top">
     <h1><span class="sel" data-k="Heading"><i></i><i></i><i></i><i></i>Click the button that's wrong. Your coding agent fixes it.</span></h1>
     <p class="lede">Clickthrough is a local review page for product flows. Your agent captures every screen of signup, onboarding or checkout, with every branch. You click through them like the real app and comment on any component. The agent changes the code, captures the screen again and shows its proof.</p>
-    <div class="setup" data-c="Text">
-      <div class="setup-head">
-        <p class="setup-title">Paste this into your coding agent</p>
-        <button type="button" class="copy" data-copy-from="agent-prompt">Copy prompt</button>
-      </div>
-      <pre class="setup-prompt" id="agent-prompt">Set up Clickthrough in this project so I can review our product flows.
-
-1. Install it: npm install -g clickthrough
-2. Read its agent guide and follow it: https://github.com/S4M3R/clickthrough/blob/main/AGENTS.md (the same file ships in the package, at "$(npm root -g)/clickthrough/AGENTS.md").
-3. Capture our signup and onboarding flow: every screen and every branch.
-4. Start the review server, give me the URL of the first screen, and keep watching for my comments.</pre>
-      <p class="setup-foot">It installs Clickthrough, captures the flow and opens the review for you. Change “signup and onboarding” to the flow you want. Works with Claude Code, Codex, Cursor, T3 Code, or any agent that can run a shell command and drive a browser.</p>
-    </div>
-    <div class="cta byhand">
-      <span class="or">or install it yourself</span>
+    <div class="cta">
+      <button type="button" class="install" data-copy-from="agent-prompt" aria-label="Copy the install prompt for your coding agent">Install with <span class="rotor" aria-hidden="true"><span>Claude Code</span></span></button>
       <div class="cmd" data-c="Code">
         <code><span class="p">$</span> npm install -g clickthrough</code>
         <button type="button" class="copy" data-copy="npm install -g clickthrough">Copy</button>
       </div>
-      <a class="ghost" href="https://github.com/S4M3R/clickthrough">Read the source on GitHub</a>
     </div>
+    <p class="fine install-hint" aria-live="polite">The button copies a prompt. Paste it into your coding agent: it installs Clickthrough, captures your flow and opens the review.</p>
     <p class="fine">Open source, MIT. Needs Node 18 or newer. No dependencies, no account, nothing leaves your machine.</p>
 
     <figure class="shot hero-shot">
@@ -132,7 +119,8 @@
   <section id="prompt" class="split">
     <div>
       <h2 data-c="Heading">Set it up with your agent</h2>
-      <p>You do not install or capture anything by hand. Paste one prompt into your coding agent, in your project, and it does the four steps: install, read the guide, capture the flow, open the review.</p>
+      <p>You do not install or capture anything by hand. The install button copies one prompt. Paste it into your coding agent, in your project, and it does four steps: install, read the guide, capture the flow, open the review.</p>
+      <p>It works with Claude Code, Codex, Cursor, T3 Code, or any agent that can run a shell command and drive a browser.</p>
       <p><a href="https://github.com/S4M3R/clickthrough/blob/main/AGENTS.md">AGENTS.md</a> is the guide, written for the agent: how to capture a screen and its components, how to wire the branches, and how to work through your comments.</p>
       <p>When it is done you get a link like <code>localhost:4777/p/web/onboarding/signup</code>. Open it and start clicking.</p>
     </div>
@@ -143,7 +131,17 @@
         <li>Captures every screen and branch of the flow you name.</li>
         <li>Starts the review and watches for your comments.</li>
       </ol>
-      <button type="button" class="copy" data-copy-from="agent-prompt">Copy prompt for your agent</button>
+      <details class="see-prompt">
+        <summary>See the prompt</summary>
+        <pre class="setup-prompt" id="agent-prompt">Set up Clickthrough in this project so I can review our product flows.
+
+1. Install it: npm install -g clickthrough
+2. Read its agent guide and follow it: https://github.com/S4M3R/clickthrough/blob/main/AGENTS.md (the same file ships in the package, at "$(npm root -g)/clickthrough/AGENTS.md").
+3. Capture our signup and onboarding flow: every screen and every branch.
+4. Start the review server, give me the URL of the first screen, and keep watching for my comments.</pre>
+        <p class="setup-foot">Change “signup and onboarding” to the flow you want reviewed.</p>
+      </details>
+      <button type="button" class="copy" data-copy-from="agent-prompt">Copy prompt</button>
     </div>
   </section>
 
@@ -240,7 +238,7 @@
   <section class="end">
     <h2 data-c="Heading">Try it on your own flow</h2>
     <div class="cta">
-      <button type="button" class="copy solid" data-copy-from="agent-prompt">Copy prompt for your agent</button>
+      <button type="button" class="install" data-copy-from="agent-prompt" aria-label="Copy the install prompt for your coding agent">Install with <span class="rotor" aria-hidden="true"><span>Claude Code</span></span></button>
       <div class="cmd" data-c="Code">
         <code><span class="p">$</span> npm install -g clickthrough</code>
         <button type="button" class="copy" data-copy="npm install -g clickthrough">Copy</button>
