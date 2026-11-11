@@ -196,8 +196,9 @@ footer { max-width: 1040px; margin: 0 auto; padding: 22px 20px 40px; border-top:
 .install { display: inline-flex; align-items: center; gap: 0.35em; font: 600 16px var(--sans); color: #fff; background: var(--select); border: 0; border-radius: 10px; padding: 13px 18px; cursor: pointer; white-space: nowrap; }
 .install:hover { filter: brightness(1.08); }
 .install.ok { background: var(--green); }
-.rotor { display: inline-block; min-width: 6.2em; text-align: left; overflow: hidden; vertical-align: bottom; }
-.rotor span { display: inline-block; }
+.rotor { display: inline-block; min-width: 8.1em; text-align: left; overflow: hidden; vertical-align: bottom; }
+.rotor span { display: inline-flex; align-items: center; gap: 0.45em; }
+.rotor img { flex: none; width: 22px; height: 22px; border-radius: 5px; display: block; }
 .rotor span.in { animation: rotor-in 0.32s cubic-bezier(0.2, 0.7, 0.2, 1); }
 @keyframes rotor-in { from { transform: translateY(70%); opacity: 0; } to { transform: none; opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { .rotor span.in { animation: none; } }
