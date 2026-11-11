@@ -102,7 +102,7 @@ await shot("done");
 await page.locator('#navView [data-view="changes"]').click();
 await page.locator(".change").first().click();
 await page.locator(".cmp-frame img").last().evaluate((img) => img.decode());
-await shot("compare", { clip: { x: 0, y: 0, width: 1280, height: 470 } });
+await shot("compare", { clip: { x: 0, y: 0, width: 1280, height: 500 } });
 await page.locator('#navView [data-view="tree"]').click();
 
 // Social image: the template in og.html, at exactly 1200x630.
