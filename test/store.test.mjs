@@ -222,3 +222,34 @@ test("image attachments: real images only, referenced from comments and replies"
     await app.close();
   }
 });
+
+test("demo serves a private copy of the bundled example", async () => {
+  const { spawn } = await import("node:child_process");
+  const fs = await import("node:fs/promises");
+  const { fileURLToPath } = await import("node:url");
+  const home = await mkdtemp(path.join(tmpdir(), "ct-demo-"));
+  const cli = path.join(path.dirname(fileURLToPath(import.meta.url)), "..", "bin", "cli.mjs");
+  const child = spawn("node", [cli, "demo", "--no-open", "--port", "0"], { env: { ...process.env, CLICKTHROUGH_HOME: home } });
+  try {
+    const url = await new Promise((resolve, reject) => {
+      let out = "";
+      child.stdout.on("data", (d) => { out += d; const m = out.match(/http:\/\/localhost:\d+/); if (m) resolve(m[0]); });
+      child.on("exit", () => reject(new Error(`demo exited early: ${out}`)));
+    });
+    const flows = await (await fetch(`${url}/api/flows`)).json();
+    assert.deepEqual(flows.map((f) => f.id), ["demo/onboarding"]);
+    assert.equal(flows[0].review, 1);
+    // A comment lands in the copy, not in the package's examples folder.
+    const key = encodeURIComponent("demo/onboarding");
+    const res = await fetch(`${url}/api/flows/${key}/comments`, {
+      method: "POST", headers: { "content-type": "application/json" },
+      body: JSON.stringify({ screen: "done", version: 1, target: null, text: "from the test" }),
+    });
+    assert.equal(res.status, 201);
+    assert.match(await fs.readFile(path.join(home, "demo", "onboarding", "comments.json"), "utf8"), /from the test/);
+    assert.doesNotMatch(await fs.readFile(path.join(path.dirname(cli), "..", "examples", "onboarding", "comments.json"), "utf8"), /from the test/);
+  } finally {
+    child.kill();
+    await fs.rm(home, { recursive: true, force: true });
+  }
+});

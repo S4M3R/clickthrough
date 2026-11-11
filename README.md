@@ -47,6 +47,18 @@ The recording uses a made-up product; the scripts that produce it are in
   reply and resolve, and a `watch` command that prints each new comment as one
   line, so an agent running it in the background is woken by your comments.
 
+## Try it in 30 seconds
+
+```bash
+npx clickthrough demo
+```
+
+It opens a made-up product's signup flow with comments in every state: one
+change waiting for your check (with its before and after), one the agent has a
+question about, one in progress and one already checked. Click around, press
+`N` to walk the flow like the real app, press `C` and click any component to
+comment. It is a private copy; `clickthrough demo --reset` starts it over.
+
 ## Install
 
 Needs Node 18 or newer.
@@ -61,8 +73,7 @@ Then, from anywhere:
 clickthrough          # opens the review in your browser, with every project
 ```
 
-No install? `npx clickthrough` does the same. To see the demo
-flow, clone the repo and run `npm start`.
+No install? `npx clickthrough` does the same.
 
 ## Projects
 

@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.2.1
+
+- **`clickthrough demo`.** One command opens an example flow you can click and
+  comment on, with a change waiting for your check, one in progress, one the
+  agent asked about and one checked. `npx clickthrough demo` needs no setup.
+- **Reply and comment boxes.** One field that grows with the text, with attach
+  and send inside it. Enter sends a reply, Shift+Enter starts a new line.
+- **Checked changes** collapse into one row at the bottom of the Changes list
+  and open into compact rows.
+- **In progress** comments show in Changes: "Working", or "Needs reply" when
+  the agent's reply is the latest message.
+- Under the before and after, a bar repeats the request and the agent's reply,
+  with Reply and Looks good.
+- "Looks good" replaces the state chip of a waiting card on hover.
+
 ## 0.2.0
 
 The reviewer now has the last word on every change.
