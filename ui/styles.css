@@ -8,10 +8,12 @@
   --line: oklch(0.925 0.006 258);
   --hover: oklch(0.96 0.005 258);
   --stage: oklch(0.955 0.005 258);
-  --accent: oklch(0.55 0.2 258);
+  --accent: #7b4dff;
   --accent-fg: #ffffff;
-  --accent-wash: oklch(0.55 0.2 258 / 0.11);
-  --accent-line: oklch(0.55 0.2 258 / 0.3);
+  --accent-wash: rgb(123 77 255 / 0.11);
+  --accent-line: rgb(123 77 255 / 0.3);
+  --accent-faint: rgb(123 77 255 / 0.28);
+  --accent-dash: rgb(123 77 255 / 0.55);
   --ok: oklch(0.508 0.118 166);
   --ok-wash: oklch(0.696 0.17 162 / 0.14);
   --warn: oklch(0.555 0.163 49);
@@ -25,8 +27,9 @@
     --bg: oklch(0.17 0.008 258); --panel: oklch(0.205 0.008 258); --fg: oklch(0.95 0.005 258);
     --muted: oklch(0.7 0.012 258); --faint: oklch(0.5 0.01 258); --line: oklch(0.3 0.01 258);
     --hover: oklch(0.25 0.01 258); --stage: oklch(0.14 0.008 258);
-    --accent: oklch(0.7 0.16 258); --accent-fg: oklch(0.17 0.01 258);
-    --accent-wash: oklch(0.7 0.16 258 / 0.16); --accent-line: oklch(0.7 0.16 258 / 0.4);
+    --accent: #a48bff; --accent-fg: oklch(0.17 0.01 258);
+    --accent-wash: rgb(164 139 255 / 0.16); --accent-line: rgb(164 139 255 / 0.4);
+    --accent-faint: rgb(164 139 255 / 0.32); --accent-dash: rgb(164 139 255 / 0.6);
     --ok: oklch(0.845 0.143 165); --ok-wash: oklch(0.696 0.17 162 / 0.18); --warn: oklch(0.879 0.169 92);
     --shadow: 0 1px 2px oklch(0 0 0 / 0.4), 0 8px 28px oklch(0 0 0 / 0.4);
     color-scheme: dark;
@@ -50,7 +53,14 @@ kbd { font-family: var(--mono); font-size: 11px; border: 1px solid var(--line); 
 .brand { padding: 18px 16px 12px; display: flex; flex-direction: column; gap: 10px; border-bottom: 1px solid var(--line); }
 .brand-row { display: flex; align-items: center; gap: 8px; }
 .brand h1 { margin: 0; font-size: 15px; font-weight: 600; }
-.logo { width: 18px; height: 18px; border-radius: 5px; background: linear-gradient(135deg, var(--accent), oklch(0.65 0.15 220)); }
+/* The wordmark is shown selected, like a component in Comment mode. */
+.brand-row .wordmark { position: relative; display: inline-block; margin: 14px 0 0; padding: 4px 7px; font-size: 15px; font-weight: 600; letter-spacing: -0.03em; line-height: 1; outline: 1.5px solid var(--accent); }
+.wordmark::before { content: "Heading"; position: absolute; left: -1.5px; bottom: calc(100% + 1.5px); background: var(--accent); color: var(--accent-fg); font: 500 9.5px/1 var(--mono); letter-spacing: 0; padding: 2.5px 4px; }
+.wordmark i { position: absolute; width: 6px; height: 6px; background: var(--panel); border: 1.5px solid var(--accent); }
+.wordmark i:nth-of-type(1) { left: -3.5px; top: -3.5px; }
+.wordmark i:nth-of-type(2) { right: -3.5px; top: -3.5px; }
+.wordmark i:nth-of-type(3) { left: -3.5px; bottom: -3.5px; }
+.wordmark i:nth-of-type(4) { right: -3.5px; bottom: -3.5px; }
 .flow-picker select { width: 100%; font: inherit; font-size: 13px; padding: 6px 8px; border: 1px solid var(--line); border-radius: 7px; background: var(--panel); color: var(--fg); }
 .flow-title { margin: 0; font-size: 12.5px; color: var(--muted); }
 .tree-wrap { flex: 1; overflow-y: auto; padding: 10px 8px 16px; }
@@ -97,9 +107,9 @@ kbd { font-family: var(--mono); font-size: 11px; border: 1px solid var(--line); 
 .stage { flex: 1; overflow: auto; background: var(--stage); padding: 24px; position: relative; }
 .frame { position: relative; margin: 0 auto; max-width: 1200px; border-radius: 10px; overflow: hidden; border: 1px solid var(--line); box-shadow: var(--shadow); background: #fff; }
 .frame img { display: block; width: 100%; height: auto; }
-.hs { position: absolute; border: 0; padding: 0; background: transparent; border-radius: 4px; cursor: pointer; outline: 1.5px solid transparent; outline-offset: 1px; }
-.show .hs { outline-color: oklch(0.55 0.2 258 / 0.28); }
-.hs:hover, .hs:focus-visible, .hs.lit { outline: 2px solid var(--accent); background: oklch(0.55 0.2 258 / 0.08); z-index: 5; }
+.hs { position: absolute; border: 0; padding: 0; background: transparent; border-radius: 0; cursor: pointer; outline: 1.5px solid transparent; outline-offset: 1px; }
+.show .hs { outline-color: var(--accent-faint); }
+.hs:hover, .hs:focus-visible, .hs.lit { outline: 2px solid var(--accent); background: var(--accent-wash); z-index: 5; }
 .pin { position: absolute; z-index: 8; transform: translate(-50%, -60%); min-width: 22px; height: 22px; padding: 0 6px; border-radius: 11px 11px 11px 3px; border: 2px solid #fff; background: var(--accent); color: #fff; font-size: 11px; font-weight: 600; display: grid; place-items: center; cursor: pointer; box-shadow: 0 2px 6px oklch(0 0 0 / .25); }
 .pin.resolved { background: var(--ok); }
 .pin.dim { opacity: .45; }
@@ -185,8 +195,8 @@ a.brand-row { color: inherit; text-decoration: none; }
 /* Navigate mode: components that lead somewhere get a dashed outline, the rest go quiet. */
 .frame.navigate .hs { cursor: default; }
 .frame.navigate .hs:hover, .frame.navigate .hs:focus-visible { outline-color: transparent; background: transparent; }
-.frame.navigate .hs.go { cursor: pointer; outline: 1.5px dashed oklch(0.55 0.2 258 / 0.55); z-index: 4; }
-.frame.navigate .hs.go:hover, .frame.navigate .hs.go:focus-visible { outline: 2px solid var(--accent); background: oklch(0.55 0.2 258 / 0.10); }
+.frame.navigate .hs.go { cursor: pointer; outline: 1.5px dashed var(--accent-dash); z-index: 4; }
+.frame.navigate .hs.go:hover, .frame.navigate .hs.go:focus-visible { outline: 2px solid var(--accent); background: var(--accent-wash); }
 .frame.navigate .pin { opacity: 0.35; pointer-events: none; }
 .tip .go-to { color: var(--accent-fg); font-weight: 600; }
 /* Areas that lead nowhere must not swallow clicks meant for a linked component under them. */
