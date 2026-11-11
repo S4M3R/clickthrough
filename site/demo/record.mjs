@@ -139,7 +139,7 @@ await sleep(2000);
 //    before and after, then accept it from the list
 await click(ui.locator('#navView [data-view="changes"]'), 1000);
 await click(ui.locator(".change").first(), 2600, { dx: 0.5, dy: 0.25 });
-await click(ui.locator(".change .change-ok"), 2600);
+await click(ui.locator(".change .change-ok"), 2600); // shown in place of the state while the pointer is on the card
 
 await cdp.send("Page.stopScreencast");
 await sleep(300);

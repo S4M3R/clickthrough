@@ -298,14 +298,16 @@ function changeCard({ c, last, shown, kind, at }) {
   if (shown) meta.append(el("span", "v", c.version != null && c.version !== shown.v ? `v${c.version} → v${shown.v}` : `v${shown.v}`));
   else if (c.version != null) meta.append(el("span", "v", `v${c.version}`));
 
-  card.append(top, el("div", "change-title", title), meta);
   if (kind === "check") {
-    const ok = el("button", "btn primary change-ok", "Looks good");
+    // On hover the state gives way to the action, in the same spot.
+    const ok = el("button", "change-ok");
     ok.type = "button";
     ok.title = "Accept this change (Y)";
+    ok.append(strokeIcon(["M5.5 8.2l1.8 1.8 3.2-3.6"], false), "Looks good");
     ok.onclick = (e) => { e.stopPropagation(); confirmChange(c); };
-    card.appendChild(ok);
+    top.appendChild(ok);
   }
+  card.append(top, el("div", "change-title", title), meta);
   card.onclick = () => openChange(c, shown);
   card.addEventListener("keydown", (e) => {
     // Enter or Space opens a card; on the open one, Enter is left to the page (it accepts).
