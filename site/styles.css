@@ -16,7 +16,6 @@
   --display: "Geist", ui-sans-serif, system-ui, sans-serif;
   --sans: "Geist", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-  --rail: 264px;
   --shadow: 0 1px 2px rgb(18 20 26 / 0.06), 0 14px 40px rgb(18 20 26 / 0.1);
   color-scheme: light;
 }
@@ -59,21 +58,12 @@ h1 .sel i:nth-of-type(1), h1 .sel i:nth-of-type(2) { top: -5px; }
 h1 .sel i:nth-of-type(3), h1 .sel i:nth-of-type(4) { bottom: -5px; }
 
 /* ---------- top bar (small screens) ---------- */
-.top { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; }
-.top-link { font-size: 15px; font-weight: 500; color: var(--ink); }
-
-/* ---------- rail: the contents as a branch tree (wide screens) ---------- */
-.rail { display: none; }
-.tree, .tree ul { list-style: none; margin: 0; padding: 0; }
-.tree ul { margin: 2px 0 8px 13px; padding-left: 8px; border-left: 1px solid var(--line); }
-.row { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 6px; font-size: 14px; color: var(--ink); text-decoration: none; }
-a.row:hover { background: rgb(18 20 26 / 0.05); }
-a.row[aria-current="true"] { background: var(--select-wash); }
-.row .n { flex: none; min-width: 18px; font: 11px var(--mono); color: var(--muted); }
-.row.branch { color: var(--muted); font-weight: 500; font-size: 13.5px; padding: 5px 6px; }
-.row.join { color: var(--muted); font-size: 13.5px; }
-.caret { flex: none; width: 10px; height: 10px; transform: rotate(90deg); fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
-.rail-foot { margin: auto 0 0; padding-top: 14px; border-top: 1px solid var(--line); font-size: 12.5px; line-height: 1.45; color: var(--muted); }
+.top { display: flex; align-items: center; justify-content: space-between; gap: 16px; max-width: 1040px; margin: 0 auto; padding: 16px 20px; }
+.repo { display: inline-flex; align-items: center; gap: 8px; padding: 7px 12px; border: 1px solid var(--line); border-radius: 9px; background: var(--panel); color: var(--ink); font-size: 14.5px; font-weight: 500; text-decoration: none; white-space: nowrap; }
+.repo:hover { border-color: var(--ink); }
+.repo .stars { padding-left: 8px; border-left: 1px solid var(--line); color: var(--muted); font-variant-numeric: tabular-nums; }
+.repo-link { display: inline-flex; align-items: center; gap: 8px; }
+@media (max-width: 480px) { .repo span:not(.stars) { display: none; } }
 
 /* ---------- layout ---------- */
 main { max-width: 1040px; margin: 0 auto; padding: 0 20px; }
@@ -180,15 +170,7 @@ footer { max-width: 1040px; margin: 0 auto; padding: 22px 20px 40px; border-top:
   .plain p { max-width: none; }
 }
 @media (min-width: 1240px) {
-  .top { display: none; }
-  .rail {
-    display: flex; flex-direction: column; gap: 22px;
-    position: fixed; inset: 0 auto 0 0; width: var(--rail); padding: 22px 14px 18px;
-    background: var(--panel); border-right: 1px solid var(--line); overflow-y: auto;
-  }
-  .rail .brand { margin: 0 8px; align-self: flex-start; }
-  main, footer { margin-left: calc(var(--rail) + max(40px, (100vw - var(--rail) - 1040px) / 2)); margin-right: auto; }
-  .hero { padding-top: 64px; }
+  .hero { padding-top: 48px; }
 }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
 

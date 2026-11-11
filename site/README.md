@@ -22,5 +22,5 @@ Every image and the video come from `demo/`, which uses a made-up product
 `media/agents/` holds the small logos shown in the install button. They are the
 marks of their owners, used only to name the agents Clickthrough works with:
 Claude Code, Codex (OpenAI) and Cursor from [Simple Icons](https://simpleicons.org),
-T3 Code, Orca and Conductor from the icons on their own sites (t3.codes,
-onorca.dev, conductor.build). Replace or remove one if its owner asks.
+OpenCode, T3 Code, Orca and Conductor from the icons on their own sites
+(opencode.ai, t3.codes, onorca.dev, conductor.build). Replace or remove one if its owner asks.

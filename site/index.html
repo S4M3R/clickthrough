@@ -32,48 +32,14 @@
 <body>
 <a class="skip" href="#main">Skip to content</a>
 
-<!-- The page's contents, drawn the way Clickthrough draws a flow: a branch tree. -->
-<aside class="rail" aria-label="On this page">
-  <a class="brand" href="#top" aria-label="Clickthrough"><span class="sel" data-k="Heading" aria-hidden="true"><i></i><i></i><i></i><i></i>clickthrough</span></a>
-  <nav>
-    <ul class="tree">
-      <li><a class="row" href="#top"><span class="n">01</span><span class="t">What it is</span></a></li>
-      <li><a class="row" href="#loop"><span class="n">02</span><span class="t">The loop</span></a></li>
-      <li>
-        <span class="row branch"><svg class="caret" viewBox="0 0 10 10" aria-hidden="true"><path d="M3.5 2 L7 5 L3.5 8"/></svg>Set it up</span>
-        <ul>
-          <li><a class="row" href="#prompt"><span class="n">01</span><span class="t">With your agent</span></a></li>
-          <li><a class="row" href="#install"><span class="n">02</span><span class="t">By hand</span></a></li>
-        </ul>
-      </li>
-      <li>
-        <span class="row branch"><svg class="caret" viewBox="0 0 10 10" aria-hidden="true"><path d="M3.5 2 L7 5 L3.5 8"/></svg>Review</span>
-        <ul>
-          <li><a class="row" href="#modes"><span class="n">01</span><span class="t">Comment or navigate</span></a></li>
-          <li><a class="row" href="#branches"><span class="n">02</span><span class="t">Branches</span></a></li>
-        </ul>
-      </li>
-      <li>
-        <span class="row branch"><svg class="caret" viewBox="0 0 10 10" aria-hidden="true"><path d="M3.5 2 L7 5 L3.5 8"/></svg>The agent's side</span>
-        <ul>
-          <li><a class="row" href="#done"><span class="n">01</span><span class="t">Done, with evidence</span></a></li>
-          <li><a class="row" href="#more"><span class="n">02</span><span class="t">Versions, projects, files</span></a></li>
-        </ul>
-      </li>
-      <li><a class="row join" href="https://github.com/S4M3R/clickthrough"><span class="n">↪</span><span class="t">continues at GitHub</span></a></li>
-    </ul>
-  </nav>
-  <p class="rail-foot">This list is drawn like a flow in Clickthrough: screens in order, a branch at each choice.</p>
-</aside>
-
 <header class="top">
   <a class="brand" href="#top" aria-label="Clickthrough"><span class="sel" data-k="Heading" aria-hidden="true"><i></i><i></i><i></i><i></i>clickthrough</span></a>
-  <a class="top-link" href="https://github.com/S4M3R/clickthrough">GitHub</a>
+  <a class="repo" href="https://github.com/S4M3R/clickthrough" aria-label="Clickthrough on GitHub"><svg viewBox="0 0 16 16" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8"/></svg><span>S4M3R/clickthrough</span><span class="stars" id="stars" hidden></span></a>
 </header>
 
 <main id="main">
   <section class="hero" id="top">
-    <h1><span class="sel" data-k="Heading"><i></i><i></i><i></i><i></i>Click what's wrong. Your agent fixes it.</span></h1>
+    <h1><span class="sel" data-k="Heading"><i></i><i></i><i></i><i></i>Click what's wrong.<br>Your agent fixes it.</span></h1>
     <p class="lede">Your agent captures every screen of a flow. You click through it and comment on any component. The agent changes the code and shows its proof.</p>
     <div class="cta">
       <button type="button" class="install" data-copy-from="agent-prompt" aria-label="Copy the install prompt for your coding agent">Install with <span class="rotor" aria-hidden="true"><span><img src="media/agents/claude-code.svg" alt="" width="22" height="22">Claude Code</span></span></button>
@@ -81,6 +47,7 @@
         <code><span class="p">$</span> npm install -g clickthrough</code>
         <button type="button" class="copy" data-copy="npm install -g clickthrough">Copy</button>
       </div>
+      <a class="ghost repo-link" href="https://github.com/S4M3R/clickthrough"><svg viewBox="0 0 16 16" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8"/></svg>View on GitHub</a>
     </div>
     <p class="fine">Open source, MIT. Needs Node 18 or newer. No dependencies, no account, nothing leaves your machine.</p>
 
@@ -119,7 +86,7 @@
     <div>
       <h2 data-c="Heading">Set it up with your agent</h2>
       <p>You do not install or capture anything by hand. The install button copies one prompt. Paste it into your coding agent, in your project, and it does four steps: install, read the guide, capture the flow, open the review.</p>
-      <p>It works with Claude Code, Codex, Cursor, T3 Code, Orca, Conductor, or any agent that can run a shell command and drive a browser.</p>
+      <p>It works with Claude Code, Codex, Cursor, OpenCode, T3 Code, Orca, Conductor, or any agent that can run a shell command and drive a browser.</p>
       <p><a href="https://github.com/S4M3R/clickthrough/blob/main/AGENTS.md">AGENTS.md</a> is the guide, written for the agent: how to capture a screen and its components, how to wire the branches, and how to work through your comments.</p>
       <p>When it is done you get a link like <code>localhost:4777/p/web/onboarding/signup</code>. Open it and start clicking.</p>
     </div>

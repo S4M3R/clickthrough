@@ -1,5 +1,5 @@
 // Small behaviours for the landing page: copy buttons, the Comment/Navigate
-// switch (with the tool's own C and N keys), and the current row in the tree.
+// switch (with the tool's own C and N keys), the install button and the star count.
 
 for (const button of document.querySelectorAll(".copy")) {
   const label = button.textContent;
@@ -28,18 +28,16 @@ document.addEventListener("keydown", (e) => {
   if (e.key === "c" || e.key === "n") setMode(e.key === "n" ? "navigate" : "comment");
 });
 
-// Mark the section in view in the tree, as the tool marks the open screen.
-const rows = new Map();
-for (const a of document.querySelectorAll('.rail a.row[href^="#"]')) rows.set(a.getAttribute("href").slice(1), a);
-if (rows.size && "IntersectionObserver" in window) {
-  const visible = new Set();
-  const observer = new IntersectionObserver((entries) => {
-    for (const e of entries) e.isIntersecting ? visible.add(e.target.id) : visible.delete(e.target.id);
-    const current = [...rows.keys()].find((id) => visible.has(id));
-    for (const [id, a] of rows) a.setAttribute("aria-current", String(id === current));
-  }, { rootMargin: "-20% 0px -55% 0px" });
-  for (const id of rows.keys()) observer.observe(document.getElementById(id));
-}
+// Star count next to the repository link, when GitHub answers.
+fetch("https://api.github.com/repos/S4M3R/clickthrough")
+  .then((r) => (r.ok ? r.json() : null))
+  .then((repo) => {
+    const el = document.getElementById("stars");
+    if (!el || !repo || !(repo.stargazers_count >= 10)) return; // a handful of stars says nothing yet
+    el.textContent = `★ ${repo.stargazers_count.toLocaleString("en")}`;
+    el.hidden = false;
+  })
+  .catch(() => {});
 
 // People who asked for less motion get a still frame and the play button.
 const demo = document.getElementById("demo");
@@ -59,7 +57,7 @@ for (const pan of document.querySelectorAll(".pan")) {
 // and says where to paste it.
 const AGENTS = [
   ["Claude Code", "claude-code.svg"], ["Codex", "codex.svg"], ["Cursor", "cursor.svg"],
-  ["T3 Code", "t3-code.png"], ["Orca", "orca.png"], ["Conductor", "conductor.png"],
+  ["OpenCode", "opencode.png"], ["T3 Code", "t3-code.png"], ["Orca", "orca.png"], ["Conductor", "conductor.png"],
 ];
 for (const [, file] of AGENTS) new Image().src = `media/agents/${file}`; // so a logo is there when its turn comes
 const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
