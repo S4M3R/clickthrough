@@ -81,11 +81,19 @@ The registry is `~/.config/clickthrough/projects.json`.
 
 ## Use it with your coding agent
 
-Tell your agent (Claude Code, Codex, Cursor, T3 Code…):
+Paste this into your agent (Claude Code, Codex, Cursor, T3 Code…), in your
+project. It installs Clickthrough, captures the flow and opens the review:
 
-> Read https://github.com/S4M3R/clickthrough/blob/main/AGENTS.md, then capture
-> our signup and onboarding flow with every branch, start the review server and
-> watch for my comments.
+```text
+Set up Clickthrough in this project so I can review our product flows.
+
+1. Install it: npm install -g clickthrough
+2. Read its agent guide and follow it: https://github.com/S4M3R/clickthrough/blob/main/AGENTS.md (the same file ships in the package, at "$(npm root -g)/clickthrough/AGENTS.md").
+3. Capture our signup and onboarding flow: every screen and every branch.
+4. Start the review server, give me the URL of the first screen, and keep watching for my comments.
+```
+
+Change "signup and onboarding" to the flow you want reviewed.
 
 [AGENTS.md](AGENTS.md) is written for the agent: how to capture a screen and its
 components, how to wire branches, and how to work through comments.
