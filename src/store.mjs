@@ -52,6 +52,7 @@ export class Store {
         title: flow.title,
         screens: Object.keys(flow.screens).length,
         open: comments.filter((c) => c.status === "open").length,
+        review: comments.filter(needsCheck).length,
       });
     }
     return out.sort((a, b) => a.title.localeCompare(b.title));
@@ -255,13 +256,17 @@ export class Store {
         at: new Date().toISOString(),
       });
       // A reviewer answering a resolved thread means it isn't done.
-      if (author !== "agent" && c.status === "resolved") c.status = "open";
+      if (author !== "agent" && c.status === "resolved") {
+        c.status = "open";
+        delete c.confirmedAt;
+      }
     });
   }
 
   /**
    * The agent closes a comment: a reply saying what it did, the evidence that
-   * it worked, and the thread resolved. Evidence items:
+   * it worked, and the thread resolved. It then waits for the reviewer to
+   * check it (see confirm). Evidence items:
    *   {type: "version", screen, v?}   the screen version that shows the change (v defaults to latest)
    *   {type: "image", file}           a screenshot or recording frame, copied into the flow
    *   {type: "link", url, label?}     a PR, commit, preview deploy…
@@ -308,16 +313,30 @@ export class Store {
     c.status = "resolved";
     c.resolvedAt = new Date().toISOString();
     c.resolvedBy = "agent";
+    delete c.confirmedAt; // done again after a reopen: the reviewer checks again
     await this.writeComments(flowId, comments);
     return c;
   }
 
-  async setStatus(flowId, commentId, status) {
+  /** The reviewer looked at what the agent did and accepts it. */
+  async confirm(flowId, commentId) {
+    return this.#update(flowId, commentId, (c) => {
+      if (c.status !== "resolved") throw new UserError("Only a finished comment can be confirmed.");
+      c.confirmedAt = new Date().toISOString();
+    });
+  }
+
+  async setStatus(flowId, commentId, status, by) {
     if (status !== "open" && status !== "resolved") {
       throw new UserError(`Status must be "open" or "resolved".`);
     }
     return this.#update(flowId, commentId, (c) => {
       c.status = status;
+      if (status === "open") delete c.confirmedAt;
+      else if (by) {
+        c.resolvedBy = by;
+        c.resolvedAt = new Date().toISOString();
+      }
     });
   }
 
@@ -330,6 +349,9 @@ export class Store {
     return c;
   }
 }
+
+/** Finished by the agent and not yet checked by the reviewer. */
+export const needsCheck = (c) => c.status === "resolved" && c.resolvedBy === "agent" && !c.confirmedAt;
 
 export const MAX_ATTACHMENT_BYTES = 10 * 1024 * 1024;
 

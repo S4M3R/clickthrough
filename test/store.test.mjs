@@ -155,6 +155,31 @@ test("markDone resolves with evidence and validates it", async () => {
   await assert.rejects(() => s.markDone("f", c.id, { text: "x", evidence: [{ type: "link", url: "javascript:alert(1)" }] }), /http/);
 });
 
+test("a finished comment waits for the reviewer to check it", async () => {
+  const { dir, img } = await fixture();
+  const s = new Store(dir);
+  await s.initFlow("f", {});
+  await s.addScreenVersion("f", "a", { image: img });
+  const c = await s.addComment("f", { screen: "a", version: 1, text: "Fix it" });
+  await assert.rejects(() => s.confirm("f", c.id), /finished/);
+  await s.markDone("f", c.id, { text: "Fixed" });
+  assert.equal((await s.listFlows())[0].review, 1);
+  const ok = await s.confirm("f", c.id);
+  assert.ok(ok.confirmedAt);
+  assert.equal((await s.listFlows())[0].review, 0);
+  // A reply reopens it; done again needs a new check.
+  const again = await s.reply("f", c.id, { text: "Not quite" });
+  assert.equal(again.status, "open");
+  assert.equal(again.confirmedAt, undefined);
+  await s.markDone("f", c.id, { text: "Fixed again" });
+  assert.equal((await s.listFlows())[0].review, 1);
+  // Resolved by the reviewer by hand: nothing to check.
+  await s.setStatus("f", c.id, "open");
+  const mine = await s.setStatus("f", c.id, "resolved", "reviewer");
+  assert.equal(mine.resolvedBy, "reviewer");
+  assert.equal((await s.listFlows())[0].review, 0);
+});
+
 test("image attachments: real images only, referenced from comments and replies", async () => {
   const { dir, img } = await fixture();
   const app = createServer({ projects: [{ id: "p", name: "P", dir }] });

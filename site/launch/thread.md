@@ -36,7 +36,7 @@ N to navigate. Click "Stripe" and you are on the Stripe screen, like in the real
 
 The agent runs `clickthrough watch` in the background, so each comment wakes it.
 
-When it is done, the thread says Done and shows the evidence: the new version of the screen, screenshots, the PR link and the checks it ran.
+When it finishes, the thread shows the evidence: the new version of the screen, screenshots, the PR link and the checks it ran. I check it and click "Looks good", or reply and it goes back.
 
 ---
 

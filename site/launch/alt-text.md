@@ -2,7 +2,7 @@
 
 **demo.mp4 / demo.gif**
 
-Screen recording of Clickthrough. A list of projects opens a signup flow shown as a tree of branches. In Navigate mode the pointer clicks "Continue with GitHub", then "Authorize", "Continue" and "Stripe", moving through the screens. Back on the signup screen, in Comment mode, it clicks the GitHub button and writes "Put GitHub first. Most of our users are developers." In a terminal below, the agent receives the comment and runs two commands. The screen updates to version 2 with GitHub first, and the comment turns Done with evidence: the new version, a screenshot, a link to PR 12 and "npm test: 49 passed".
+Screen recording of Clickthrough. A list of projects opens a signup flow shown as a tree of branches. In Navigate mode the pointer clicks "Continue with GitHub", then "Authorize", "Continue" and "Stripe", moving through the screens. Back on the signup screen, in Comment mode, it clicks the GitHub button and writes "Put GitHub first. Most of our users are developers." In a terminal below, the agent receives the comment and runs two commands. The screen updates to version 2 with GitHub first, and the comment is marked "To check" with evidence: the new version, a screenshot, a link to PR 12 and "npm test: 49 passed". The pointer opens it from the Changes list, compares the two versions and clicks "Looks good".
 
 **og.png (link card)**
 
@@ -22,4 +22,4 @@ Navigate mode in Clickthrough. On a "Connect your data" screen, the cards that l
 
 **evidence.png**
 
-A comment thread on "Button: Continue with GitHub", marked Done. The reviewer wrote "Put GitHub first. Most of our users are developers." The agent replied "Swapped the buttons: GitHub is first." with evidence: a button to view version 2 of the screen, a screenshot, a link to PR 12 and a check, "npm test: 49 passed".
+A comment thread on "Button: Continue with GitHub", marked "To check". The reviewer wrote "Put GitHub first. Most of our users are developers." The agent replied "Swapped the buttons: GitHub is first." with evidence: a button to view version 2 of the screen, a screenshot, a link to PR 12 and a check, "npm test: 49 passed". Under it, a "Looks good" button.

@@ -93,7 +93,6 @@ await page.locator("#outline").uncheck();
 
 // Done with evidence, and the version switch
 await open("signup");
-await page.locator('[data-filter="all"]').click();
 await page.locator(".ev-image img").evaluate((img) => img.decode());
 await shot("evidence", { locator: page.locator(".thread").first() });
 await shot("versions", { clip: { x: 280, y: 0, width: 1000, height: 300 } });

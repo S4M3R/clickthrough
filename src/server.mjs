@@ -180,7 +180,11 @@ export function createServer({ projects, dir }) {
       return json(res, await store.reply(flowId, cid, { text: b.text, images: b.images, author: b.author }));
     }
     if (req.method === "POST" && sub === "comments" && cid && action === "status") {
-      return json(res, await store.setStatus(flowId, cid, (await body(req)).status));
+      // Only the reviewer's page calls this; the agent uses the CLI.
+      return json(res, await store.setStatus(flowId, cid, (await body(req)).status, "reviewer"));
+    }
+    if (req.method === "POST" && sub === "comments" && cid && action === "confirm") {
+      return json(res, await store.confirm(flowId, cid));
     }
     throw new UserError("Not found", 404);
   }

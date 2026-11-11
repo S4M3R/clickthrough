@@ -93,6 +93,13 @@ Evidence images live in the flow folder under `evidence/` and are served from
 
 `target` may be null (comment on the whole screen). `status`: `open` | `resolved`.
 
+A comment the agent finished waits for the reviewer's check: it is "to check"
+while `status` is `resolved`, `resolvedBy` is `agent` and there is no
+`confirmedAt`. The reviewer's "Looks good" sets `confirmedAt` (ISO time).
+Reopening the thread (a reviewer reply, or status `open`) removes it, and so
+does a later `clickthrough done`. A thread the reviewer resolves by hand gets
+`resolvedBy: "reviewer"` and needs no check.
+
 ## Tree derivation (UI)
 
 The flow is a directed graph. The left nav renders it as a branch tree:
@@ -105,6 +112,11 @@ The flow is a directed graph. The left nav renders it as a branch tree:
   "↪ continues at <title>" row that jumps there, instead of repeating it.
 - Screens not reachable from `start` go in an "Unlinked" group at the bottom.
 - Each screen row shows an open-comment count badge.
+
+The sidebar switches between this tree ("Screens") and "Changes": the comments
+the agent finished, the ones still to check first, then the checked ones. A
+click opens the screen version named in the agent's evidence. The comments
+panel's "Open" filter lists open threads and finished ones not checked yet.
 - Selecting a screen remembers the branch path in the URL hash `#<screen-id>`.
 
 Versions are NOT tree nodes: the screen toolbar has a version control
@@ -120,8 +132,8 @@ A project is `{id, name, dir}` in `~/.config/clickthrough/projects.json`
 
 ## Web routes
 
-- `/`: projects home (every project and its flows, with screen and open
-  comment counts).
+- `/`: projects home (every project and its flows, with screen, open comment
+  and to-check counts).
 - `/p/<project>/<flow>/<screen>`: a screen. Older `#<key>/<screen>` links still
   resolve.
 
@@ -130,12 +142,13 @@ A project is `{id, name, dir}` in `~/.config/clickthrough/projects.json`
 | Method | Path | Body / result |
 |---|---|---|
 | GET | `/api/projects` | `[{id,name,dir,flows:<count>}]` |
-| GET | `/api/flows` | `[{id:"<project>/<flow>",flow,title,project:{id,name},screens:<count>,open:<open comments>}]` |
+| GET | `/api/flows` | `[{id:"<project>/<flow>",flow,title,project:{id,name},screens:<count>,open:<open comments>,review:<finished, to check>}]` |
 | GET | `/api/flows/:id` | `{flow, comments, project}` |
 | POST | `/api/flows/:id/attachments` | raw image bytes (PNG/JPEG/WebP/GIF, ≤10 MB) → `{path, url}` |
 | POST | `/api/flows/:id/comments` | `{screen, version, target|null, text, images?: [path]}` → comment |
 | POST | `/api/flows/:id/comments/:cid/replies` | `{text, images?, author?}` (author defaults `reviewer`) → comment |
-| POST | `/api/flows/:id/comments/:cid/status` | `{status}` → comment |
+| POST | `/api/flows/:id/comments/:cid/status` | `{status}` → comment (resolving here records `resolvedBy: "reviewer"`) |
+| POST | `/api/flows/:id/comments/:cid/confirm` | the reviewer accepts a finished comment → comment with `confirmedAt` |
 | GET | `/api/events` | SSE; event `change` data `{"flow":"<project>/<flow>"}` whenever a flow dir changes |
 | GET | `/files/:id/<path>` | static files inside the flow dir (shots) |
 | GET | `/` and `/ui/*` | the web UI (`ui/index.html`, `ui/app.js`, `ui/styles.css`) |
