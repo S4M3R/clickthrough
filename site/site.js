@@ -57,7 +57,11 @@ for (const pan of document.querySelectorAll(".pan")) {
 
 // The install button names one agent at a time. A click copies the setup prompt
 // and says where to paste it.
-const AGENTS = ["Claude Code", "Codex", "Cursor", "T3 Code"];
+const AGENTS = [
+  ["Claude Code", "claude-code.svg"], ["Codex", "codex.svg"], ["Cursor", "cursor.svg"],
+  ["T3 Code", "t3-code.png"], ["Orca", "orca.png"], ["Conductor", "conductor.png"],
+];
+for (const [, file] of AGENTS) new Image().src = `media/agents/${file}`; // so a logo is there when its turn comes
 const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
 let agent = 0;
 const installs = [...document.querySelectorAll(".install")];
@@ -65,7 +69,10 @@ const showAgent = (animate) => {
   for (const b of installs) {
     if (b.classList.contains("ok")) continue;
     const name = document.createElement("span");
-    name.textContent = AGENTS[agent];
+    const logo = new Image(22, 22);
+    logo.src = `media/agents/${AGENTS[agent][1]}`;
+    logo.alt = "";
+    name.append(logo, AGENTS[agent][0]);
     if (animate) name.className = "in";
     b.querySelector(".rotor").replaceChildren(name);
   }
@@ -75,7 +82,7 @@ for (const b of installs) {
   const html = b.innerHTML;
   b.addEventListener("click", async () => {
     const text = document.getElementById(b.dataset.copyFrom).textContent.trim();
-    const name = AGENTS[agent];
+    const name = AGENTS[agent][0];
     try {
       await navigator.clipboard.writeText(text);
       b.textContent = `Prompt copied. Paste it into ${name}`;
