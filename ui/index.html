@@ -89,16 +89,18 @@
 <div class="tip" id="tip" hidden></div>
 <div class="popover" id="popover" role="dialog" aria-label="New comment" hidden>
   <p class="pop-target" id="popTarget"></p>
-  <textarea id="popText" rows="3" placeholder="What should change? Paste or drop images here."></textarea>
-  <div class="pop-images" id="popImages" hidden></div>
-  <div class="pop-actions">
-    <label class="btn icon attach" title="Attach images (or paste / drop them)">
-      <input type="file" id="popFile" accept="image/png,image/jpeg,image/webp,image/gif" multiple hidden>
-      <span aria-hidden="true">&#128206;</span><span class="sr-only">Attach images</span>
-    </label>
-    <span class="hint">&#8984;/Ctrl + Enter</span>
-    <button type="button" class="btn" id="popCancel">Cancel</button>
-    <button type="button" class="btn primary" id="popSubmit">Comment</button>
+  <div class="composer">
+    <div class="pop-images" id="popImages" hidden></div>
+    <textarea id="popText" rows="3" placeholder="What should change? Paste or drop images here."></textarea>
+    <div class="composer-bar">
+      <label class="icon-btn" title="Attach images (or paste / drop them)">
+        <input type="file" id="popFile" accept="image/png,image/jpeg,image/webp,image/gif" multiple hidden>
+        <span id="popAttachIcon" aria-hidden="true"></span><span class="sr-only">Attach images</span>
+      </label>
+      <span class="hint">&#8984;/Ctrl + Enter</span>
+      <button type="button" class="btn quiet" id="popCancel">Cancel</button>
+      <button type="button" class="btn primary" id="popSubmit">Comment</button>
+    </div>
   </div>
 </div>
 <div class="toast" id="toast" role="status" hidden></div>
