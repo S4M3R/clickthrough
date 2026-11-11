@@ -54,7 +54,7 @@ record, the repository settings below, and the post.
 - [ ] Open the production URL on a phone and on a laptop. Play the video.
 - [ ] Paste the URL into the X composer (do not post) and check the card
       shows `og.png` with the headline.
-- [ ] Watch `site/media/demo.mp4` once more. It is 42 seconds, 1632x1200, H.264, no audio.
+- [ ] Watch `site/media/demo.mp4` once more. It is 39 seconds, 1632x1200, H.264, no audio.
 
 ## The post
 

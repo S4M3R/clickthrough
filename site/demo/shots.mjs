@@ -98,6 +98,13 @@ await shot("evidence", { locator: page.locator(".thread").first() });
 await shot("versions", { clip: { x: 280, y: 0, width: 1000, height: 300 } });
 await shot("done");
 
+// Changes: the open change with the screen before and after
+await page.locator('#navView [data-view="changes"]').click();
+await page.locator(".change").first().click();
+await page.locator(".cmp-frame img").last().evaluate((img) => img.decode());
+await shot("compare", { clip: { x: 0, y: 0, width: 1280, height: 470 } });
+await page.locator('#navView [data-view="tree"]').click();
+
 // Social image: the template in og.html, at exactly 1200x630.
 execFileSync("node", [path.join(HERE, "og.mjs")], { stdio: "inherit" });
 

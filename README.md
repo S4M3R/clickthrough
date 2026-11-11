@@ -32,8 +32,9 @@ The recording uses a made-up product; the scripts that produce it are in
 - **Done, with evidence, and you have the last word.** When the agent finishes
   a comment it shows its proof: the screen version with the change (one click
   to view), screenshots, links to the PR or deploy, and the checks it ran. The
-  comment waits under **Changes** as "To check" until you click "Looks good",
-  or reply to send it back.
+  comment waits under **Changes** as "To check". Open it to see the screen
+  before and after, side by side; click "Looks good" (or press `Y`) and you
+  are on the next one, or reply to send it back.
 - **Versions per screen.** Each re-capture is a new version with a note on what
   changed; switch between them in the toolbar.
 - **All your projects in one place.** Every project you review is registered
