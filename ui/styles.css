@@ -221,19 +221,20 @@ a.brand-row { color: inherit; text-decoration: none; }
 .seg.wide { display: flex; }
 .seg.wide button { flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
 .seg .count { min-width: 17px; padding: 0 5px; border-radius: 999px; background: var(--warn); color: var(--panel); font-size: 10.5px; font-weight: 600; line-height: 16px; }
-.changes { display: flex; flex-direction: column; gap: 4px; }
+.changes { display: flex; flex-direction: column; gap: 2px; background: var(--bg); padding-bottom: 0; }
 .changes .none { margin: 0; padding: 8px; font-size: 13px; color: var(--muted); }
-.changes .group-label { padding: 8px 8px 2px; }
-.change { position: relative; display: flex; flex-direction: column; gap: 3px; min-width: 0; border: 1px solid transparent; border-radius: 8px; padding: 8px 10px; cursor: pointer; color: var(--fg); }
+.changes .group-label { padding: 10px 10px 4px; }
+.change { position: relative; flex: none; display: flex; flex-direction: column; gap: 3px; min-width: 0; border-radius: 10px; padding: 9px 10px; cursor: pointer; color: var(--fg); }
 .change:hover { background: var(--hover); }
-.change[aria-current="true"] { background: var(--panel); border-color: var(--line); box-shadow: 0 1px 2px oklch(0 0 0 / 0.06); }
+.change[aria-current="true"] { background: var(--panel); box-shadow: 0 0 0 1px oklch(0 0 0 / 0.04), 0 1px 3px oklch(0 0 0 / 0.1); }
 .change:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
 .change-top { display: flex; align-items: center; gap: 8px; min-width: 0; font-size: 12px; color: var(--muted); }
 .change-screen { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.change-time { flex: none; font-variant-numeric: tabular-nums; }
-.chip { flex: none; display: inline-flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 500; white-space: nowrap; }
+.chip { flex: none; display: inline-flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 500; white-space: nowrap; font-variant-numeric: tabular-nums; }
 .chip .ico { width: 13px; height: 13px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
-.chip.check { color: var(--warn); }
+.chip.check, .chip.asked { color: var(--warn); }
+.chip.working { color: var(--accent); }
+.chip.checked { color: var(--ok); }
 .chip.ok { color: var(--ok); }
 .change-title { font-size: 13.5px; font-weight: 600; line-height: 1.35; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .change-meta { display: flex; align-items: baseline; gap: 8px; min-width: 0; font-size: 12px; color: var(--muted); }
@@ -263,3 +264,15 @@ a.brand-row { color: inherit; text-decoration: none; }
 .th-images { margin-top: 2px; }
 .thread.dragging { outline: 2px dashed var(--accent); outline-offset: 2px; }
 .th-actions .attach { flex: none; padding: 4px 7px; }
+
+/* Checked changes: one row at the bottom of the list that opens them */
+.checked-row { position: sticky; bottom: 0; flex: none; margin-top: auto; display: flex; align-items: center; gap: 8px; width: 100%; border: 0; border-top: 1px solid var(--line); background: var(--bg); padding: 11px 10px; margin-left: 0; font-size: 13px; color: var(--muted); cursor: pointer; text-align: left; }
+.checked-row:hover { color: var(--fg); }
+.checked-row .t { flex: 1; }
+.checked-row .n { font-variant-numeric: tabular-nums; }
+.checked-row[aria-expanded="true"] { position: static; margin-top: 8px; }
+/* Thread cards: plain indents, no rules down the left */
+.replies { border-left: 0; padding-left: 12px; }
+.evidence { border-left: 0; border-radius: 8px; margin-left: 12px; }
+/* The focus ring of a segmented button stays inside it (the group clips anything outside). */
+.seg button:focus-visible { outline-offset: -2px; }

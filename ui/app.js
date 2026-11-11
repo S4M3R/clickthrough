@@ -222,21 +222,30 @@ function renderNav() {
   if (view === "changes") renderChanges();
 }
 
-// Finished comments in the order the list shows them: to check first, newest first.
+// Every comment the agent has been asked about, in the order the list shows
+// them. kind: "check" (finished, waiting for the reviewer), "asked" (open, the
+// agent replied and waits for an answer), "working" (open, with the agent),
+// "checked" (finished and accepted).
 function changeList() {
-  const done = state.comments
-    .filter((c) => c.status === "resolved" && c.resolvedBy === "agent")
-    .sort((a, b) => String(b.resolvedAt).localeCompare(String(a.resolvedAt)));
-  return [...done.filter(needsCheck), ...done.filter((c) => !needsCheck(c))].map((c) => {
+  const items = state.comments.map((c) => {
     const last = [...c.replies].reverse().find((r) => r.author === "agent");
-    return { c, last, shown: last?.evidence?.find((e) => e.type === "version") };
-  });
+    const latest = c.replies.at(-1);
+    const byAgent = c.status === "resolved" && c.resolvedBy === "agent";
+    const kind = needsCheck(c) ? "check" : byAgent ? "checked" : c.status !== "resolved" ? (latest?.author === "agent" ? "asked" : "working") : null;
+    const at = byAgent ? c.resolvedAt : latest?.at || c.createdAt;
+    return { c, last, shown: byAgent ? last?.evidence?.find((e) => e.type === "version") : undefined, kind, at };
+  }).filter((x) => x.kind);
+  const order = ["check", "asked", "working", "checked"];
+  return items.sort((a, b) => order.indexOf(a.kind) - order.indexOf(b.kind) || String(b.at).localeCompare(String(a.at)));
 }
+const checkedOpen = () => store.get("fr-checked") === "1";
+// What the arrow keys move through: the checked ones only while their group is open.
+const visibleChanges = () => changeList().filter((x) => x.kind !== "checked" || checkedOpen());
 
 function ago(iso) {
   const s = Math.max(0, (Date.now() - new Date(iso).getTime()) / 1000);
   if (!Number.isFinite(s)) return "";
-  if (s < 60) return "now";
+  if (s < 60) return `${Math.floor(s)}s`;
   if (s < 3600) return `${Math.floor(s / 60)}m`;
   if (s < 86400) return `${Math.floor(s / 3600)}h`;
   return `${Math.floor(s / 86400)}d`;
@@ -260,55 +269,81 @@ function strokeIcon(paths, dashed) {
   return svg;
 }
 
+const CHIPS = {
+  check: ["To check", [], true],
+  asked: ["Needs reply", ["M8 5v3.4", "M8 10.9v.1"], false],
+  working: ["Working", [], true],
+  checked: ["Checked", ["M5.5 8.2l1.8 1.8 3.2-3.6"], false],
+};
+
+function changeCard({ c, last, shown, kind, at }) {
+  const card = el("div", `change ${kind}`);
+  card.setAttribute("role", "button");
+  card.tabIndex = 0;
+  card.dataset.id = c.id;
+  card.setAttribute("aria-current", String(state.lit === c.id));
+
+  const [label, paths, dashed] = CHIPS[kind];
+  const chip = el("span", `chip ${kind}`);
+  chip.append(strokeIcon(paths, dashed), at ? `${label} ${ago(at)}` : label);
+  const top = el("div", "change-top");
+  top.append(el("span", "change-screen", screens()[c.screen]?.title || c.screen), chip);
+
+  // What the agent said, or for one it is still working on, what was asked.
+  const asked = [...c.replies].reverse().find((r) => r.author !== "agent")?.text || c.text;
+  const title = kind === "working" ? asked : last?.text || c.text;
+
+  const meta = el("div", "change-meta");
+  meta.append(el("span", "change-target", targetLabel(c.target)));
+  if (shown) meta.append(el("span", "v", c.version != null && c.version !== shown.v ? `v${c.version} → v${shown.v}` : `v${shown.v}`));
+  else if (c.version != null) meta.append(el("span", "v", `v${c.version}`));
+
+  card.append(top, el("div", "change-title", title), meta);
+  if (kind === "check") {
+    const ok = el("button", "btn primary change-ok", "Looks good");
+    ok.type = "button";
+    ok.title = "Accept this change (Y)";
+    ok.onclick = (e) => { e.stopPropagation(); confirmChange(c); };
+    card.appendChild(ok);
+  }
+  card.onclick = () => openChange(c, shown);
+  card.addEventListener("keydown", (e) => {
+    // Enter or Space opens a card; on the open one, Enter is left to the page (it accepts).
+    if (e.target !== card || (e.key !== "Enter" && e.key !== " ") || (e.key === "Enter" && state.lit === c.id)) return;
+    e.preventDefault();
+    e.stopPropagation();
+    openChange(c, shown);
+  });
+  return card;
+}
+
 function renderChanges() {
   const box = $("changes");
   box.textContent = "";
   const list = changeList();
   if (!list.length) {
-    box.appendChild(el("p", "none", "Nothing yet. When the agent finishes a comment, it shows up here for you to check."));
+    box.appendChild(el("p", "none", "Nothing yet. Comments you leave show up here while the agent works on them, and again when it finishes, for you to check."));
     return;
   }
-  let group = null;
-  for (const { c, last, shown } of list) {
-    const pending = needsCheck(c);
-    if (group !== pending) {
-      group = pending;
-      const n = list.filter((x) => needsCheck(x.c) === pending).length;
-      box.appendChild(el("div", "group-label", `${pending ? "To check" : "Checked"} (${n})`));
-    }
-    const card = el("div", "change" + (pending ? " pending" : ""));
-    card.setAttribute("role", "button");
-    card.tabIndex = 0;
-    card.dataset.id = c.id;
-    card.setAttribute("aria-current", String(state.lit === c.id));
+  const group = (label, items) => {
+    if (!items.length) return;
+    box.appendChild(el("div", "group-label", `${label} (${items.length})`));
+    for (const item of items) box.appendChild(changeCard(item));
+  };
+  group("To check", list.filter((x) => x.kind === "check"));
+  group("In progress", list.filter((x) => x.kind === "asked" || x.kind === "working"));
 
-    const top = el("div", "change-top");
-    const chip = el("span", "chip " + (pending ? "check" : "ok"));
-    chip.append(strokeIcon(pending ? [] : ["M5.5 8.2l1.8 1.8 3.2-3.6"], pending), pending ? "To check" : "Checked");
-    top.append(el("span", "change-screen", screens()[c.screen]?.title || c.screen), chip);
-    if (c.resolvedAt) top.append(el("span", "change-time", ago(c.resolvedAt)));
-
-    const meta = el("div", "change-meta");
-    meta.append(el("span", "change-target", targetLabel(c.target)));
-    if (shown) meta.append(el("span", "v", c.version != null && c.version !== shown.v ? `v${c.version} → v${shown.v}` : `v${shown.v}`));
-
-    card.append(top, el("div", "change-title", last?.text || c.text), meta);
-    if (pending) {
-      const ok = el("button", "btn primary change-ok", "Looks good");
-      ok.type = "button";
-      ok.title = "Accept this change (Y)";
-      ok.onclick = (e) => { e.stopPropagation(); confirmChange(c); };
-      card.appendChild(ok);
-    }
-    card.onclick = () => openChange(c, shown);
-    card.addEventListener("keydown", (e) => {
-      // Enter or Space opens a card; on the open one, Enter is left to the page (it accepts).
-      if (e.target !== card || (e.key !== "Enter" && e.key !== " ") || (e.key === "Enter" && state.lit === c.id)) return;
-      e.preventDefault();
-      e.stopPropagation();
-      openChange(c, shown);
-    });
-    box.appendChild(card);
+  // Checked ones are out of the way: one row at the bottom that opens the list.
+  const checked = list.filter((x) => x.kind === "checked");
+  if (checked.length) {
+    const open = checkedOpen();
+    const row = el("button", "checked-row");
+    row.type = "button";
+    row.setAttribute("aria-expanded", String(open));
+    row.append(el("span", "t", "Checked"), el("span", "n", String(checked.length)), caretSvg(open));
+    row.onclick = () => { store.set("fr-checked", open ? "" : "1"); renderChanges(); };
+    box.appendChild(row);
+    if (open) for (const item of checked) box.appendChild(changeCard(item));
   }
   box.querySelector('.change[aria-current="true"]')?.scrollIntoView({ block: "nearest" });
 }
@@ -317,7 +352,8 @@ function renderChanges() {
 function openChange(c, shown) {
   const screen = shown && screens()[shown.screen] ? shown.screen : c.screen;
   if (shown) state.versionPick[screen] = shown.v;
-  if (!needsCheck(c)) setFilter("all"); // checked threads are not in the Open list
+  else if (c.version != null) state.versionPick[screen] = c.version; // still open: show what was commented on
+  if (c.status === "resolved" && !needsCheck(c)) setFilter("all"); // checked threads are not in the Open list
   if (screen !== state.screenId) selectScreen(screen);
   state.lit = c.id;
   state.compare = shown && c.version != null && (c.screen !== screen || c.version !== shown.v) ? { id: c.id } : null;
@@ -894,7 +930,7 @@ async function confirmChange(c) {
     const updated = await api(`/api/flows/${encodeURIComponent(state.flowId)}/comments/${encodeURIComponent(c.id)}/confirm`, { method: "POST", body: {} });
     upsertComment(updated);
     // Straight on to the next one waiting, so a batch reads like a queue.
-    const next = changeList().find((x) => needsCheck(x.c));
+    const next = changeList().find((x) => x.kind === "check");
     if (next) return openChange(next.c, next.shown);
     if (state.compare?.id === c.id) state.compare = null;
     renderAll();
@@ -1185,7 +1221,7 @@ document.addEventListener("keydown", (e) => {
   if (!e.metaKey && !e.ctrlKey && !e.altKey && (e.key === "n" || e.key === "c")) setMode(e.key === "n" ? "navigate" : "comment");
   if (state.navView === "changes" && !$("app").hidden && !e.metaKey && !e.ctrlKey && !e.altKey) {
     // Changes: up and down pick a change, Y or Enter accepts it, R replies.
-    const list = changeList();
+    const list = visibleChanges();
     const i = list.findIndex((x) => x.c.id === state.lit);
     const move = e.key === "ArrowDown" || e.key === "j" ? 1 : e.key === "ArrowUp" || e.key === "k" ? -1 : 0;
     if (move && list.length) {
