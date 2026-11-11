@@ -113,8 +113,11 @@ The flow is a directed graph. The left nav renders it as a branch tree:
 - Screens not reachable from `start` go in an "Unlinked" group at the bottom.
 - Each screen row shows an open-comment count badge.
 
-The sidebar switches between this tree ("Screens") and "Changes": the comments
-the agent finished, the ones still to check first, then the checked ones. Each
+The sidebar switches between this tree ("Screens") and "Changes", a list of
+the flow's comments by where they stand: "To check" (the agent finished, the
+reviewer has not accepted yet), "In progress" (open: "Working" while it is with
+the agent, "Needs reply" when the agent's reply is the latest message), and
+"Checked", collapsed into one row at the bottom that opens the list. Each
 is a card with its state, the agent's reply, the component and the versions
 (`v1 → v2`), and a "Looks good" button while it waits. Opening one shows the
 screen before and after, side by side: "before" is the version the comment was
