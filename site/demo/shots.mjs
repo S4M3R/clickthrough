@@ -100,11 +100,7 @@ await shot("versions", { clip: { x: 280, y: 0, width: 1000, height: 300 } });
 await shot("done");
 
 // Social image: the template in og.html, at exactly 1200x630.
-const og = await browser.newPage({ viewport: { width: 1200, height: 630 }, deviceScaleFactor: 1 });
-await og.goto(`file://${path.join(HERE, "og.html")}`, { waitUntil: "networkidle" });
-await og.evaluate(() => document.fonts.ready);
-await og.screenshot({ path: path.join(HERE, "..", "og.png") });
-await fs.copyFile(path.join(HERE, "..", "og.png"), path.join(HERE, "..", "launch", "og.png"));
+execFileSync("node", [path.join(HERE, "og.mjs")], { stdio: "inherit" });
 
 // X does not take WebP: keep PNG copies of the screenshots the thread uses.
 await fs.mkdir(path.join(HERE, "..", "launch", "media"), { recursive: true });

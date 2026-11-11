@@ -7,6 +7,7 @@
     "flows": "node build-flows.mjs",
     "record": "node record.mjs",
     "shots": "node shots.mjs",
+    "og": "node og.mjs",
     "all": "node build-flows.mjs && node record.mjs && node build-flows.mjs && node shots.mjs"
   },
   "devDependencies": {
