@@ -319,6 +319,27 @@ function changeCard({ c, last, shown, kind, at }) {
   return card;
 }
 
+// A checked change is done with: one line is enough (what changed, and when).
+function checkedRow({ c, last, shown, at }) {
+  const row = el("div", "change checked compact");
+  row.setAttribute("role", "button");
+  row.tabIndex = 0;
+  row.dataset.id = c.id;
+  row.setAttribute("aria-current", String(state.lit === c.id));
+  const mark = el("span", "chip checked");
+  mark.appendChild(strokeIcon(["M5.5 8.2l1.8 1.8 3.2-3.6"], false));
+  row.append(mark, el("span", "t", last?.text || c.text), el("span", "time", at ? ago(at) : ""));
+  row.title = `${screens()[c.screen]?.title || c.screen}: ${last?.text || c.text}`;
+  row.onclick = () => openChange(c, shown);
+  row.addEventListener("keydown", (e) => {
+    if (e.target !== row || (e.key !== "Enter" && e.key !== " ")) return;
+    e.preventDefault();
+    e.stopPropagation();
+    openChange(c, shown);
+  });
+  return row;
+}
+
 function renderChanges() {
   const box = $("changes");
   box.textContent = "";
@@ -345,7 +366,7 @@ function renderChanges() {
     row.append(el("span", "t", "Checked"), el("span", "n", String(checked.length)), caretSvg(open));
     row.onclick = () => { store.set("fr-checked", open ? "" : "1"); renderChanges(); };
     box.appendChild(row);
-    if (open) for (const item of checked) box.appendChild(changeCard(item));
+    if (open) for (const item of checked) box.appendChild(checkedRow(item));
   }
   box.querySelector('.change[aria-current="true"]')?.scrollIntoView({ block: "nearest" });
 }
